@@ -1,0 +1,127 @@
+# ───── Kotlin/Gradle ──────────────────────────────────────────────────────────
+.gradle/
+build/
+out/
+bin/
+generated/
+*.class
+*.log
+*.jar
+*.war
+*.ear
+*.kotlin_module
+*.db
+*.lock
+*.tmp
+*.bak
+
+# Kotlin specific
+.kotlin/
+
+# Gradle Wrapper (optional)
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration
+local.properties
+keystore.properties
+
+# ───── Android ────────────────────────────────────────────────────────────────
+/.cxx/
+/captures/
+/.externalNativeBuild/
+*.apk
+*.ap_
+*.dex
+*.so
+*.hprof
+
+# ───── iOS/macOS (Xcode, SwiftPM) ──────────────────────────────────────────────
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+*.xcworkspace
+*.xcuserdata
+*.moved-aside
+*.xcuserstate
+*/project.pbxproj
+/iosApp/iosApp.xcodeproj/xcuserdata
+
+# Swift Package Manager
+.build/
+.swiftpm/
+.swiftpm/xcode/
+.swiftpm/indices/
+Package.resolved
+Packages/
+
+# CocoaPods
+Pods/
+
+# iOS crash reports
+*.crash
+*.ips
+*.dSYM.zip
+*.dSYM
+
+# ───── Common System Files ─────────────────────────────────────────────────────
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.nfs*
+
+# ───── Editor / IDE Configurations ─────────────────────────────────────────────
+# JetBrains (IntelliJ, Android Studio, Rider)
+.fleet/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.sln.iml
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# ───── Others ──────────────────────────────────────────────────────────────────
+# Temporary files
+*.swp
+*.swo
+*.swn
+*~
+*.orig
+
+# Environment files
+.env
+.env.*
+
+# SSL keys and certificates
+*.pem
+*.key
+*.crt
+
+# Firebase configuration files
+google-services.json
+GoogleService-Info.plist
