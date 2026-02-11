@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.watermelonkode.androidapp"
+    namespace = libs.versions.android.namespace.get()
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.watermelonkode.androidapp"
+        applicationId = libs.versions.app.appId.get()
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1 // You can add this code into libs.versions.toml file.
-        versionName = "1.0" // You can add this code into libs.versions.toml file.
+        versionCode = libs.versions.app.versionCode.get().toInt()
+        versionName = libs.versions.app.versionName.get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -1,8 +1,18 @@
 [versions]
+app-appId = "com.watermelonkode.androidapp"
+app-name = "KMPApplicationTemplate"
+app-versionCode = "1"
+app-versionName = "1.0.0"
+app-console-entrypoint = "com.watermelonkode.simpletemplate.main"
+app-desktop-entrypoint = "com.watermelonkode.simpletemplate.MainKt"
+
 agp = "9.0.0"
+
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
+android-namespace = "com.watermelonkode.androidapp"
+
 androidx-activity = "1.12.2"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"

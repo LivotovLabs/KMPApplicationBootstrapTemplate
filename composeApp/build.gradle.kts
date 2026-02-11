@@ -12,7 +12,7 @@ plugins {
 kotlin {
     androidLibrary {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
-        namespace = "com.watermelonkode.simpletemplate"
+        namespace = libs.versions.android.namespace.get()
         minSdk = libs.versions.android.minSdk.get().toInt()
         androidResources.enable = true
     }
@@ -37,7 +37,7 @@ kotlin {
         macosArm64()
     ).forEach { target ->
         target.binaries.executable {
-            entryPoint = "com.watermelonkode.simpletemplate.main"
+            entryPoint = libs.versions.app.console.entrypoint.get()
         }
     }
     
@@ -98,11 +98,11 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "com.watermelonkode.simpletemplate.MainKt"
+        mainClass = libs.versions.app.desktop.entrypoint.get()
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.watermelonkode.simpletemplate"
-            packageVersion = "1.0.0"
+            packageName = libs.versions.app.appId.get()
+            packageVersion = libs.versions.app.versionName.get()
         }
     }
 }
