@@ -14,10 +14,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import kmpapplicationtemplate.composeapp.generated.resources.Res
+import kmpapplicationtemplate.composeapp.generated.resources.compose_multiplatform
 import org.jetbrains.compose.resources.painterResource
 
-import simpletemplate.composeapp.generated.resources.Res
-import simpletemplate.composeapp.generated.resources.compose_multiplatform
 
 @Composable
 @Preview
