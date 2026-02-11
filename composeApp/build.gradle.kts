@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidKmpLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kmpAppIconGenerator)
 }
 
 kotlin {
@@ -103,6 +104,17 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = libs.versions.app.appId.get()
             packageVersion = libs.versions.app.versionName.get()
+            
+            val iconsDir = project.file("src/desktopMain/resources/icons")
+            macOS {
+                iconFile.set(iconsDir.resolve("icon.icns"))
+            }
+            windows {
+                iconFile.set(iconsDir.resolve("icon.ico"))
+            }
+            linux {
+                iconFile.set(iconsDir.resolve("icon.png"))
+            }
         }
     }
 }
