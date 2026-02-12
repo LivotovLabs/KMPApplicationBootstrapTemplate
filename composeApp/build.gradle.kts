@@ -100,10 +100,18 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
         }
 
-        iosMain.dependencies {
-            // Ktor Platform Specific
-            implementation(libs.ktor.client.darwin)
+        val iosMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+            }
         }
+        
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        
+        iosArm64Main.dependsOn(iosMain)
+        iosSimulatorArm64Main.dependsOn(iosMain)
 
         val desktopMain by getting {
             dependencies {
