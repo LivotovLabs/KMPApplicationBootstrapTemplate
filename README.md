@@ -87,6 +87,36 @@ The iOS project configuration file at `iosApp/Configuration/Config.xcconfig` is 
 *   A Gradle task `syncIosConfig` runs automatically before any Kotlin compilation to ensure the iOS config is up-to-date.
 *   **Do not modify `iosApp/Configuration/Config.xcconfig` manually**, as your changes will be overwritten.
 
+## Logging
+The project includes a `LoggingService` for unified logging across all platforms. The default implementation uses the DiamondEdge logging library.
+
+### Usage
+Inject the `LoggingService` into your interactors or services:
+
+```kotlin
+class MyInteractor(
+    private val logger: LoggingService
+) : Interactor<MyState>(...) {
+
+    fun doSomething() {
+        logger.debug("MyTag") { "Doing something..." }
+        
+        try {
+            // ...
+        } catch (e: Exception) {
+            logger.error("MyTag", e) { "An error occurred" }
+        }
+    }
+}
+```
+
+Available methods:
+*   `info(tag: String, msg: () -> Any?)`
+*   `debug(tag: String, msg: () -> Any?)`
+*   `error(tag: String, exception: Any?, msg: () -> Any?)`
+
+*Note: The message is provided as a lambda for lazy evaluation, ensuring no string construction overhead if the log level is disabled.*
+
 ## Running the Application
 
 ### Android
