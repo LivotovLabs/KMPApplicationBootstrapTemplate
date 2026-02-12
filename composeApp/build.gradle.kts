@@ -1,6 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -46,8 +45,8 @@ kotlin {
             binaryOption("bundleVersion", libs.versions.app.versionCode.get())
 
             freeCompilerArgs += listOf(
-                "-Xbuild-version-string=${libs.versions.app.versionName.get()}", // e.g. "1.0.0"
-                "-Xbuild-number=${libs.versions.app.versionCode.get()}", // build number
+                "-Xbuild-version-string=${libs.versions.app.versionName.get()}",
+                "-Xbuild-number=${libs.versions.app.versionCode.get()}",
             )
         }
     }
