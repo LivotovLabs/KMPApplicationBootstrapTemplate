@@ -1,231 +1,155 @@
 # KMP Application Bootstrap
 
-This is a Kotlin Multiplatform (KMP) project template with Compose Multiplatform support for Android, iOS, Desktop (JVM), and Web (WASM) targets.
+This is a comprehensive **Kotlin Multiplatform (KMP)** project template designed to accelerate the development of production-ready applications. It supports **Android**, **iOS**, **Desktop (JVM)**, and **Web (WASM)** out of the box.
 
-## Supported Platforms
+The goal is to provide a **minimal-batteries-included** starting point. It solves common architectural challenges—such as navigation, persistent settings, and logging—without enforcing a bloated framework, allowing you to focus on your application's unique features.
 
-*   **Android**
-*   **iOS**
-*   **Desktop (JVM)**: macOS, Linux, Windows
-*   **Web (WASM)**: Browser
+## Project Foundation
+
+This project is built on the latest KMP structure compatible with the **Android Gradle Plugin (AGP) 9**.
+
+*   **Origin**: Generated using the official [KMP App Wizard](https://kmp.jetbrains.com/?android=true&ios=true&iosui=compose&includeTests=true).
+*   **Modernization**: Heavily inspired by the [watermelonKode/kmp-wizard-template](https://github.com/watermelonKode/kmp-wizard-template), incorporating migration strategies for AGP 9 and modern multiplatform best practices.
+*   **Libraries**: This project also relies heavily on **[OSKit-KMP](https://github.com/outsidesource/OSKit-KMP)** and **[OSKit-Compose-KMP](https://github.com/outsidesource/OSKit-Compose-KMP)** as its core framework foundation. It also uses **[KmLogging](https://github.com/DiamondEdge1/KmLogging)** for robust multiplatform logging. These libraries provide solid implementations for common architectural patterns and logging needs.
+
+---
+
+## Getting Started
+
+To start a new project using this template:
+
+1.  **Clone** this repository.
+2.  **Configure**: Update your App Name, ID, and Namespaces in `gradle/libs.versions.toml`.
+3.  **Prune Targets**: Remove any platform targets you don't need from `composeApp/build.gradle.kts`.
+4.  **Prune Components**: Remove any pre-installed services or components that aren't relevant to your app.
+5.  **Code**: Start building your features in `commonMain`!
+
+---
+
+## Architecture & Core Concepts
+
+This project follows the **VISCE** architecture pattern and utilizes the [OSKit-KMP](https://github.com/outsidesource/OSKit-KMP) library.
+
+*   **Reference**: [VISCE Architecture Documentation](https://ryanmitchener.notion.site/VISCE-va-s-Architecture-d0878313b4154d2999bf3bf36cb072ff)
+
+### Navigation
+*   **`App.kt`**: The main UI entry point. It initializes the `AppInteractor` and `AppCoordinator` and uses `RouteSwitch` to render content.
+*   **`AppCoordinator`**: Manages navigation logic (push, pop, deep links).
+*   **`RouteSwitch`**: A composable that observes the coordinator and switches screens.
+
+**Adding a New Screen:**
+1.  **Define Route**: Add a route object to `sealed class Route` in `composeApp/.../ui/router.kt`.
+2.  **Create Screen**: Build your Composable (e.g., `SettingsScreen`).
+3.  **Register**: Update `RouteSwitch` in `App.kt` to map the route to the screen.
+    ```kotlin
+    RouteSwitch(coordinator) {
+        when (it) {
+            Route.Home -> Authorized(state) { HomeScreen() }
+            Route.Settings -> Authorized(state) { SettingsScreen() }
+        }
+    }
+    ```
+4.  **Navigate**: Call `push(Route.Settings)` from your Coordinator/Interactor.
+
+### Logging
+A unified `LoggingService` is available across all platforms.
+
+```kotlin
+// Injection
+class MyInteractor(private val logger: LoggingService) : Interactor<MyState>(...) {
+    fun doSomething() {
+        logger.debug("Tag") { "Lazy log message" }
+        logger.error("Tag", exception) { "Error occurred" }
+    }
+}
+```
+
+### Dependency Injection
+The project uses **Koin** for Dependency Injection, pre-configured for both common and platform-specific code.
+
+We specifically chose the **Koin DSL** over annotation-based configuration to:
+*   **Maintain Maximum Flexibility**: Better support for complex dependency setups and conditional registrations.
+*   **Centralized Visibility**: All dependencies and their configurations are clearly visible in a single place (`DI.kt` files), making the project easier to understand without hunting for annotations or relying on specialized IDE plugins.
+
+*   **Common DI**: Defined in `composeApp/src/commonMain/kotlin/com/watermelonkode/simpletemplate/DI.kt`.
+*   **Platform DI**: Implemented in platform-specific modules (e.g., `androidMain`, `iosMain`, `desktopMain`) to handle platform-specific dependencies.
+
+### Settings & App Information
+Use `AppSettingsInteractor` for UI-related state (user settings + app version).
+
+*   **`AppSettingsInteractor`**: Provides `settings` (e.g., theme, mute) and `appVersion`/`buildNumber`.
+*   **`AppSettingsService`**: Low-level Key-Value storage for settings.
+*   **`AppInformationService`**: Low-level provider for platform-specific version metadata.
+
+---
 
 ## Configuration
 
-The project uses `gradle/libs.versions.toml` as the single source of truth for application metadata, versions, and entry points. You can modify the following keys in the `[versions]` section:
+The `gradle/libs.versions.toml` file is the **single source of truth** for configuration.
 
-*   `app-name`: The display name of the application (used for iOS).
-*   `app-appId`: The application ID / Bundle Identifier (e.g., `com.example.app`).
-*   `app-versionCode`: The integer version code (used for Android `versionCode` and iOS `CURRENT_PROJECT_VERSION`).
-*   `app-versionName`: The semantic version string (used for Android `versionName`, iOS `MARKETING_VERSION`, and Desktop `packageVersion`). **Note:** Must be in `MAJOR.MINOR.BUILD` format (e.g., `1.0.0`) for Windows MSI compatibility.
-*   `app-desktop-entrypoint`: The main class for the desktop application.
-*   `android-namespace`: The namespace for the library module (`composeApp`).
-*   `app-namespace`: The namespace for the Android application module (`androidApp`).
+### Essential Keys
+Modify these in `[versions]`:
+*   `app-name`: Application Display Name.
+*   `app-appId`: Bundle ID / Application ID.
+*   `app-versionName`: Semantic version (e.g., `1.0.0`).
+*   `app-versionCode`: Build number (Integer).
+*   `android-namespace` / `app-namespace`: Package namespaces.
 
 ### Android Signing
-Android signing is configured in `androidApp/build.gradle.kts`. It automatically loads credentials from `local.properties` (first) or `gradle.properties` (fallback).
+Configure signing in `androidApp/build.gradle.kts`. Credentials are loaded from `local.properties` (recommended) or `gradle.properties`.
 
-The following keys are supported:
-*   `android.key.store`: Path to the keystore file (relative to `androidApp` folder).
-*   `android.key.store.password`: Password for the keystore.
-*   `android.key.alias`: Key alias.
-*   `android.key.password`: Password for the key.
-
-**Security Note:** For production, move these values to `local.properties` (which is excluded from version control) or use environment variables in your CI/CD pipeline.
-
-### Launcher Icons
-Launcher icons for Android and iOS are managed using the `kmp-app-icon-generator` plugin.
-
-1.  **Source Image**: Place your source icon (SVG or high-resolution PNG) at `composeApp/src/commonMain/composeResources/drawable/icon.svg` (or `icon.png`).
-2.  **Generate Assets**: Run the following command to generate the platform-specific assets:
-    ```bash
-    ./gradlew :composeApp:generateIcons --no-configuration-cache
-    ```
-    *Note: The `--no-configuration-cache` flag is currently required for this task due to a plugin limitation.*
-
-This task automatically populates:
-*   **Android**: `androidApp/src/main/res/mipmap-*`
-*   **iOS**: `iosApp/iosApp/Assets.xcassets/AppIcon.appiconset`
-
-For **Desktop**, platform-specific icons are stored at `composeApp/src/desktopMain/resources/icons/`. You should replace the following files with your own valid icons:
-*   **macOS**: `icon.icns`
-*   **Windows**: `icon.ico`
-*   **Linux**: `icon.png`
-
-These are configured in `composeApp/build.gradle.kts` under `compose.desktop.application.nativeDistributions`:
-```kotlin
-nativeDistributions {
-    // ...
-    val iconsDir = project.file("src/desktopMain/resources/icons")
-    macOS {
-        iconFile.set(iconsDir.resolve("icon.icns"))
-    }
-    windows {
-        iconFile.set(iconsDir.resolve("icon.ico"))
-    }
-    linux {
-        iconFile.set(iconsDir.resolve("icon.png"))
-    }
-}
-```
-
-#### Desktop Icon Requirements
-*   **macOS (`icon.icns`)**:
-    *   **Format**: Apple Icon Image (`.icns`).
-    *   **Content**: Should include multiple sizes: 16x16, 32x32, 128x128, 256x256, 512x512, and 1024x1024 (for Retina).
-    *   **Transparency**: Supported (Alpha channel).
-*   **Windows (`icon.ico`)**:
-    *   **Format**: Windows Icon (`.ico`).
-    *   **Content**: Should include multiple sizes: 16x16, 24x24, 32x32, 48x48, 64x64, and 256x256.
-    *   **Transparency**: Supported.
-*   **Linux (`icon.png`)**:
-    *   **Format**: PNG (`.png`).
-    *   **Size**: Recommended 512x512 or higher.
-    *   **Transparency**: Supported.
+**Keys**: `android.key.store`, `android.key.store.password`, `android.key.alias`, `android.key.password`.
 
 ### iOS Configuration
-The iOS project configuration file at `iosApp/Configuration/Config.xcconfig` is **auto-generated** from the values in `gradle/libs.versions.toml`.
-*   A Gradle task `syncIosConfig` runs automatically before any Kotlin compilation to ensure the iOS config is up-to-date.
-*   **Do not modify `iosApp/Configuration/Config.xcconfig` manually**, as your changes will be overwritten.
+*   **Auto-Generated**: `iosApp/Configuration/Config.xcconfig` is generated automatically from `libs.versions.toml` by the `syncIosConfig` task. **Do not edit it manually.**
 
-## Logging
-The project includes a `LoggingService` for unified logging across all platforms. The default implementation uses the DiamondEdge logging library.
+### Application Icons
+Icons are managed by the `kmp-app-icon-generator` plugin.
 
-### Usage
-Inject the `LoggingService` into your interactors or services:
+1.  **Source**: Place `icon.svg` or `icon.png` in `composeApp/src/commonMain/composeResources/drawable/`.
+2.  **Generate**: Run `./gradlew :composeApp:generateIcons --no-configuration-cache`.
+    *   Populates Android `mipmap` and iOS `Assets.xcassets`.
+3.  **Desktop**: Manually replace icons in `composeApp/src/desktopMain/resources/icons/` (`icon.icns`, `icon.ico`, `icon.png`).
 
-```kotlin
-class MyInteractor(
-    private val logger: LoggingService
-) : Interactor<MyState>(...) {
+---
 
-    fun doSomething() {
-        logger.debug("MyTag") { "Doing something..." }
-        
-        try {
-            // ...
-        } catch (e: Exception) {
-            logger.error("MyTag", e) { "An error occurred" }
-        }
-    }
-}
-```
-
-Available methods:
-*   `info(tag: String, msg: () -> Any?)`
-*   `debug(tag: String, msg: () -> Any?)`
-*   `error(tag: String, exception: Any?, msg: () -> Any?)`
-
-*Note: The message is provided as a lambda for lazy evaluation, ensuring no string construction overhead if the log level is disabled.*
-
-## Settings
-The `AppSettingsService` provides a unified interface for managing application settings across platforms, backed by a Key-Value store.
-
-### Usage
-Inject the `AppSettingsService` to observe or update settings:
-
-```kotlin
-class SettingsInteractor(
-    private val settingsService: AppSettingsService,
-    private val logger: LoggingService
-) : Interactor<SettingsState>(...) {
-
-    override suspend fun initialWork() {
-        // Observe settings changes
-        settingsService.observeSettings().collect { settings ->
-            logger.debug("Settings") { "Settings updated: $settings" }
-            updateState { copy(muted = settings.muted) }
-        }
-    }
-
-    fun toggleMute() {
-        // Update settings
-        scope.launch {
-            val currentSettings = state.value.settings
-            settingsService.updateSettings(currentSettings.copy(muted = !currentSettings.muted))
-        }
-    }
-}
-```
-
-Available methods:
-*   `observeSettings(): Flow<AppSettings>`: specific Flow emitting the current settings state.
-*   `updateSettings(value: AppSettings)`: Updates the settings with a new value.
-*   `clearSettings()`: Resets settings to default.
-
-## App Information
-The `AppInformationService` provides a unified way to retrieve application metadata like version name and build number across all platforms.
-
-*   `getAppVersion(): String`: Returns the semantic version (e.g., "1.0.0").
-*   `getAppBuildNumber(): Int`: Returns the build number (e.g., 1).
-
-### AppSettingsInteractor
-The `AppSettingsInteractor` is a higher-level component that manages both user settings and app metadata. It is useful for displaying version information on settings screens.
-
-**State Includes:**
-*   `settings: AppSettings`: User-configurable settings (e.g., `muted`).
-*   `appVersion: String`: Current version from `AppInformationService`.
-*   `appBuildNumber: Int`: Current build number from `AppInformationService`.
-
-## Running the Application
+## Building & Running
 
 ### Android
-To run the Android application on a connected device or emulator:
-```bash
-./gradlew :androidApp:installDebug
-```
-Or open the project in Android Studio and run the `androidApp` configuration.
-
-To build a release APK:
-```bash
-./gradlew :androidApp:assembleRelease
-```
-The APK will be in `androidApp/build/outputs/apk/release/`.
-
-To build an Android App Bundle (AAB) for Play Store:
-```bash
-./gradlew :androidApp:bundleRelease
-```
-The AAB will be in `androidApp/build/outputs/bundle/release/`.
+*   **Run**: `./gradlew :androidApp:installDebug`
+*   **Release APK**: `./gradlew :androidApp:assembleRelease` (Output: `androidApp/build/outputs/apk/release/`)
+*   **Play Store Bundle**: `./gradlew :androidApp:bundleRelease`
 
 ### iOS
-To run the iOS application:
-1.  Open `iosApp/iosApp.xcodeproj` in Xcode.
-2.  Select a simulator or connected device.
-3.  Click the "Run" button (or press `Cmd+R`).
-
-To build for the App Store:
-1.  Open `iosApp/iosApp.xcodeproj` in Xcode.
-2.  Select "Any iOS Device (arm64)" as the target.
-3.  Go to **Product -> Archive**.
-4.  Once the archive is created, the Organizer window will open. Click **Distribute App** to upload to TestFlight or the App Store.
+*   **Run**: Open `iosApp/iosApp.xcodeproj` in Xcode and run.
+*   **Archive/App Store**: In Xcode, select "Any iOS Device" -> **Product** -> **Archive**.
 
 ### Desktop (JVM)
-To run the desktop application:
-```bash
-./gradlew :composeApp:run
-```
-
-To create a release distribution for your current platform:
-```bash
-./gradlew :composeApp:package
-```
-The resulting package (DMG, MSI, or DEB) will be located in `composeApp/build/compose/binaries/main/`.
-
-*   **macOS**: Generates `.dmg`
-*   **Windows**: Generates `.msi`
-*   **Linux**: Generates `.deb`
-
-*Note: To build a distribution for a specific platform, you must run the task on that platform.*
+*   **Run**: `./gradlew :composeApp:run`
+*   **Package**: `./gradlew :composeApp:package`
+    *   Output: `composeApp/build/compose/binaries/main/` (DMG, MSI, or DEB depending on OS).
 
 ### Web (WASM)
-To run the WebAssembly application in your default browser (with hot reload):
-```bash
-./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-```
-To build a production distribution:
-```bash
-./gradlew :composeApp:wasmJsBrowserDistribution
-```
+*   **Run**: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun`
+*   **Build**: `./gradlew :composeApp:wasmJsBrowserDistribution`
+
+---
+
+## Managing Targets
+
+If you do not need all platforms, remove them to speed up builds:
+
+*   **WASM/Desktop**: Remove targets from `composeApp/build.gradle.kts` and delete `src/desktopMain` / `src/wasmJsMain`.
+*   **Android**: Delete `androidApp` folder, remove from `settings.gradle.kts`, and remove `androidLibrary` from `composeApp`.
+*   **iOS**: Delete `iosApp` folder and remove iOS targets from `composeApp/build.gradle.kts`.
+
+---
+
+## Roadmap
+
+We are continuously improving this template. Current priorities include:
+*   **Automated Project Setup**: A custom Gradle task to automate initial configuration (App ID/Name) and recursive package renaming.
+*   **Enhanced DI**: Full support for the latest **Koin Kotlin Compiler** plugin for compile-time safety and reduced boilerplate.
 
 ## License
 
