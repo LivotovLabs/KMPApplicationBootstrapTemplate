@@ -1,8 +1,8 @@
 package com.watermelonkode.simpletemplate
 
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.window.CanvasBasedWindow
 import androidx.compose.ui.window.ComposeViewport
+import com.watermelonkode.simpletemplate.ui.App
 import kotlinx.browser.document
 import org.jetbrains.compose.resources.configureWebResources
 
@@ -15,6 +15,6 @@ fun main() {
     }
 
     ComposeViewport(document.body!!) {
-        App() // deepLink = document.location?.href
+        App(deepLink = document.location?.href)
     }
 }

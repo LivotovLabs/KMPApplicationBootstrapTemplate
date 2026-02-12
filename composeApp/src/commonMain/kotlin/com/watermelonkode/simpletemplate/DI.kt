@@ -1,5 +1,9 @@
 package com.watermelonkode.simpletemplate
 
+import com.watermelonkode.simpletemplate.ui.AppCoordinator
+import com.watermelonkode.simpletemplate.ui.AppInteractor
+import com.watermelonkode.simpletemplate.ui.screen.details.DetailsScreenViewInteractor
+import com.watermelonkode.simpletemplate.ui.screen.home.HomeScreenViewInteractor
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.KoinAppDeclaration
@@ -18,5 +22,11 @@ fun initKoin(
 }
 
 fun commonModule() = module {
+    // UI Foundation
+    single { AppCoordinator() }
+    factory { params -> AppInteractor(params[0], get()) }
 
+    // UI Screens
+    factory { HomeScreenViewInteractor(get()) }
+    factory { params -> DetailsScreenViewInteractor(params[0], get()) }
 }
