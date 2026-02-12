@@ -117,6 +117,41 @@ Available methods:
 
 *Note: The message is provided as a lambda for lazy evaluation, ensuring no string construction overhead if the log level is disabled.*
 
+## Settings
+The `AppSettingsService` provides a unified interface for managing application settings across platforms, backed by a Key-Value store.
+
+### Usage
+Inject the `AppSettingsService` to observe or update settings:
+
+```kotlin
+class SettingsInteractor(
+    private val settingsService: AppSettingsService,
+    private val logger: LoggingService
+) : Interactor<SettingsState>(...) {
+
+    override suspend fun initialWork() {
+        // Observe settings changes
+        settingsService.observeSettings().collect { settings ->
+            logger.debug("Settings") { "Settings updated: $settings" }
+            updateState { copy(muted = settings.muted) }
+        }
+    }
+
+    fun toggleMute() {
+        // Update settings
+        scope.launch {
+            val currentSettings = state.value.settings
+            settingsService.updateSettings(currentSettings.copy(muted = !currentSettings.muted))
+        }
+    }
+}
+```
+
+Available methods:
+*   `observeSettings(): Flow<AppSettings>`: specific Flow emitting the current settings state.
+*   `updateSettings(value: AppSettings)`: Updates the settings with a new value.
+*   `clearSettings()`: Resets settings to default.
+
 ## Running the Application
 
 ### Android
