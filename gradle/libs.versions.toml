@@ -108,3 +108,4 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kmpAppIconGenerator = { id = "io.github.qamarelsafadi.kmp.app.icon.generator", version = "1.2.6" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version = "0.15.2" }

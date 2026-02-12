@@ -152,6 +152,20 @@ Available methods:
 *   `updateSettings(value: AppSettings)`: Updates the settings with a new value.
 *   `clearSettings()`: Resets settings to default.
 
+## App Information
+The `AppInformationService` provides a unified way to retrieve application metadata like version name and build number across all platforms.
+
+*   `getAppVersion(): String`: Returns the semantic version (e.g., "1.0.0").
+*   `getAppBuildNumber(): Int`: Returns the build number (e.g., 1).
+
+### AppSettingsInteractor
+The `AppSettingsInteractor` is a higher-level component that manages both user settings and app metadata. It is useful for displaying version information on settings screens.
+
+**State Includes:**
+*   `settings: AppSettings`: User-configurable settings (e.g., `muted`).
+*   `appVersion: String`: Current version from `AppInformationService`.
+*   `appBuildNumber: Int`: Current build number from `AppInformationService`.
+
 ## Running the Application
 
 ### Android

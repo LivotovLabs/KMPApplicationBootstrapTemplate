@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid) apply false
     alias(libs.plugins.androidKmpLibrary) apply false
     alias(libs.plugins.kmpAppIconGenerator) apply false
+    alias(libs.plugins.buildkonfig) apply false
 }
 
 val syncIosConfig by tasks.registering {

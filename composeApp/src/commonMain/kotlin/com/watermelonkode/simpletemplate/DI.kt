@@ -1,8 +1,11 @@
 package com.watermelonkode.simpletemplate
 
 import com.watermelonkode.simpletemplate.data.core.KtorClient
+import com.watermelonkode.simpletemplate.data.service.AppInformationServiceImpl
 import com.watermelonkode.simpletemplate.data.service.DiamondEdgeLoggingServiceImpl
 import com.watermelonkode.simpletemplate.data.service.KVStoreBasedAppSettingsServiceImpl
+import com.watermelonkode.simpletemplate.domain.interactor.AppSettingsInteractor
+import com.watermelonkode.simpletemplate.domain.service.AppInformationService
 import com.watermelonkode.simpletemplate.domain.service.AppSettingsService
 import com.watermelonkode.simpletemplate.domain.service.LoggingService
 import com.watermelonkode.simpletemplate.ui.AppCoordinator
@@ -32,6 +35,9 @@ fun commonModule() = module {
     single { DiamondEdgeLoggingServiceImpl() } bind LoggingService::class
     single { KVStoreBasedAppSettingsServiceImpl(get()) } bind AppSettingsService::class
     single { KtorClient(get()) }
+
+    // App Interactors
+    single { AppSettingsInteractor(get(), get()) }
 
     // UI Foundation
     single { AppCoordinator() }

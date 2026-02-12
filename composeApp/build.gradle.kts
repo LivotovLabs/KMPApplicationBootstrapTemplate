@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import com.codingfeline.buildkonfig.compiler.FieldSpec
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -8,6 +9,17 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kmpAppIconGenerator)
+    alias(libs.plugins.buildkonfig)
+}
+
+buildkonfig {
+    packageName = "com.watermelonkode.simpletemplate"
+    objectName = "BuildKonfig"
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "APP_VERSION", libs.versions.app.versionName.get())
+        buildConfigField(FieldSpec.Type.INT, "APP_BUILD_NUMBER", libs.versions.app.versionCode.get())
+    }
 }
 
 kotlin {
