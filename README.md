@@ -18,7 +18,19 @@ The project uses `gradle/libs.versions.toml` as the single source of truth for a
 *   `app-versionCode`: The integer version code (used for Android `versionCode` and iOS `CURRENT_PROJECT_VERSION`).
 *   `app-versionName`: The semantic version string (used for Android `versionName`, iOS `MARKETING_VERSION`, and Desktop `packageVersion`). **Note:** Must be in `MAJOR.MINOR.BUILD` format (e.g., `1.0.0`) for Windows MSI compatibility.
 *   `app-desktop-entrypoint`: The main class for the desktop application.
-*   `android-namespace`: The namespace for the Android module.
+*   `android-namespace`: The namespace for the library module (`composeApp`).
+*   `app-namespace`: The namespace for the Android application module (`androidApp`).
+
+### Android Signing
+Android signing is configured in `androidApp/build.gradle.kts`. It automatically loads credentials from `local.properties` (first) or `gradle.properties` (fallback).
+
+The following keys are supported:
+*   `android.key.store`: Path to the keystore file (relative to `androidApp` folder).
+*   `android.key.store.password`: Password for the keystore.
+*   `android.key.alias`: Key alias.
+*   `android.key.password`: Password for the key.
+
+**Security Note:** For production, move these values to `local.properties` (which is excluded from version control) or use environment variables in your CI/CD pipeline.
 
 ### Launcher Icons
 Launcher icons for Android and iOS are managed using the `kmp-app-icon-generator` plugin.
