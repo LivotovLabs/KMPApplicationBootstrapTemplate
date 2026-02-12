@@ -1,10 +1,13 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
 }
 
 android {
-    namespace = libs.versions.android.namespace.get()
+    namespace = libs.versions.app.namespace.get()
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
@@ -17,9 +20,32 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("signing") {
+            val keystorePropertiesFile = rootProject.file("local.properties")
+            val keystoreProperties = Properties()
+            if (keystorePropertiesFile.exists()) {
+                keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+            }
+
+            fun getProperty(key: String): String? {
+                return keystoreProperties.getProperty(key) ?: project.findProperty(key)?.toString()
+            }
+
+            keyAlias = getProperty("android.key.alias")
+            keyPassword = getProperty("android.key.password")
+            storeFile = file(getProperty("android.key.store") ?: "signing.jks")
+            storePassword = getProperty("android.key.store.password")
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("signing")
+        }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("signing")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -27,8 +53,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -37,7 +63,7 @@ android {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 

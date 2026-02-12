@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,29 +22,31 @@ fun HomeScreen(
 ) {
     val state = interactor.collectAsState()
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    Scaffold {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(Res.drawable.compose_multiplatform),
-                contentDescription = null,
-                modifier = Modifier.size(128.dp)
-            )
-
-            Text(
-                text = state.greeting,
-                style = MaterialTheme.typography.headlineMedium
-            )
-
-            Button(
-                onClick = { interactor.onDetailsClicked("123") }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Open Details")
+                Image(
+                    painter = painterResource(Res.drawable.compose_multiplatform),
+                    contentDescription = null,
+                    modifier = Modifier.size(128.dp)
+                )
+
+                Text(
+                    text = state.greeting,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+
+                Button(
+                    onClick = { interactor.onDetailsClicked("123") }
+                ) {
+                    Text("Open Details")
+                }
             }
         }
     }

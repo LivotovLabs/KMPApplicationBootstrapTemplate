@@ -3,6 +3,7 @@ package com.watermelonkode.simpletemplate.ui.screen.details
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,23 +20,25 @@ fun DetailsScreen(
 ) {
     val state = interactor.collectAsState()
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    Scaffold {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Details ${state.id}",
-                style = MaterialTheme.typography.headlineMedium
-            )
-
-            Button(
-                onClick = { interactor.homeClicked() }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Close")
+                Text(
+                    text = "Details ${state.id}",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+
+                Button(
+                    onClick = { interactor.homeClicked() }
+                ) {
+                    Text("Close")
+                }
             }
         }
     }

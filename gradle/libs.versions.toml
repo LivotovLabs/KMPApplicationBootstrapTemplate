@@ -8,9 +8,10 @@ app-desktop-entrypoint = "com.watermelonkode.simpletemplate.MainKt"
 agp = "9.0.0"
 
 android-compileSdk = "36"
-android-minSdk = "24"
+android-minSdk = "28"
 android-targetSdk = "36"
-android-namespace = "com.watermelonkode.androidapp"
+android-namespace = "com.watermelonkode.simpletemplate"
+app-namespace = "com.watermelonkode.androidapp"
 
 androidx-activity = "1.12.4"
 androidx-appcompat = "1.7.1"
