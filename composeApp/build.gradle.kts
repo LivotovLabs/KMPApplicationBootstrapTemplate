@@ -70,6 +70,9 @@ kotlin {
             implementation(libs.kotlinx.serialization)
             implementation(libs.kotlinx.datetime)
 
+            // Logger
+            implementation(libs.logger)
+
             // DI
             implementation(libs.koin.core)
 
