@@ -30,18 +30,6 @@ kotlin {
         binaries.executable()
     }
 
-    // Console targets
-    listOf(
-        linuxX64(),
-        mingwX64(),
-        macosX64(),
-        macosArm64()
-    ).forEach { target ->
-        target.binaries.executable {
-            entryPoint = libs.versions.app.console.entrypoint.get()
-        }
-    }
-    
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -49,9 +37,21 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            linkerOpts.add("-lsqlite3")
+
+            export(libs.oskit.kmp)
+            export(libs.kotlinx.coroutines.core)
+
+            binaryOption("bundleId", libs.versions.app.appId.get())
+            binaryOption("bundleVersion", libs.versions.app.versionCode.get())
+
+            freeCompilerArgs += listOf(
+                "-Xbuild-version-string=${libs.versions.app.versionName.get()}", // e.g. "1.0.0"
+                "-Xbuild-number=${libs.versions.app.versionCode.get()}", // build number
+            )
         }
     }
-    
+
     sourceSets {
         val commonMain by getting
         val commonTest by getting
@@ -69,7 +69,15 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+
+            // DI
+            implementation(libs.koin.core)
+
+            // OSKIT
+            api(libs.oskit.kmp)
+            implementation(libs.oskit.compose)
         }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
@@ -81,19 +89,7 @@ kotlin {
         }
 
         val wasmJsMain by getting
-        
-        val consoleMain by creating {
-             dependsOn(commonMain)
-        }
 
-        val linuxX64Main by getting
-        val mingwX64Main by getting
-        val macosX64Main by getting
-        val macosArm64Main by getting
-
-        listOf(linuxX64Main, mingwX64Main, macosX64Main, macosArm64Main).forEach {
-            it.dependsOn(consoleMain)
-        }
     }
 }
 
@@ -104,7 +100,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = libs.versions.app.appId.get()
             packageVersion = libs.versions.app.versionName.get()
-            
+
             val iconsDir = project.file("src/desktopMain/resources/icons")
             macOS {
                 iconFile.set(iconsDir.resolve("icon.icns"))

@@ -8,7 +8,7 @@ import org.jetbrains.compose.resources.configureWebResources
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    //initKoin(platformContext = PlatformContext()).koin
+    initKoin(platformContext = PlatformContext()).koin
 
     configureWebResources {
         resourcePathMapping { path -> "/$path" }

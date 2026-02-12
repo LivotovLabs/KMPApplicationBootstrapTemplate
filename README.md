@@ -1,6 +1,6 @@
 # KMP Application Bootstrap
 
-This is a Kotlin Multiplatform (KMP) project template with Compose Multiplatform support for Android, iOS, Desktop (JVM), Web (WASM), and Native Console targets.
+This is a Kotlin Multiplatform (KMP) project template with Compose Multiplatform support for Android, iOS, Desktop (JVM), and Web (WASM) targets.
 
 ## Supported Platforms
 
@@ -8,7 +8,6 @@ This is a Kotlin Multiplatform (KMP) project template with Compose Multiplatform
 *   **iOS**
 *   **Desktop (JVM)**: macOS, Linux, Windows
 *   **Web (WASM)**: Browser
-*   **Console (Native)**: macOS (Arm64/x64), Linux (x64), Windows (MinGW x64)
 
 ## Configuration
 
@@ -18,7 +17,6 @@ The project uses `gradle/libs.versions.toml` as the single source of truth for a
 *   `app-appId`: The application ID / Bundle Identifier (e.g., `com.example.app`).
 *   `app-versionCode`: The integer version code (used for Android `versionCode` and iOS `CURRENT_PROJECT_VERSION`).
 *   `app-versionName`: The semantic version string (used for Android `versionName`, iOS `MARKETING_VERSION`, and Desktop `packageVersion`). **Note:** Must be in `MAJOR.MINOR.BUILD` format (e.g., `1.0.0`) for Windows MSI compatibility.
-*   `app-console-entrypoint`: The entry point for the native console application.
 *   `app-desktop-entrypoint`: The main class for the desktop application.
 *   `android-namespace`: The namespace for the Android module.
 
@@ -90,13 +88,13 @@ To build a release APK:
 ```bash
 ./gradlew :androidApp:assembleRelease
 ```
-The APK will be located in `androidApp/build/outputs/apk/release/`.
+The APK will be in `androidApp/build/outputs/apk/release/`.
 
-To build an App Bundle (AAB) for Google Play:
+To build an Android App Bundle (AAB) for Play Store:
 ```bash
 ./gradlew :androidApp:bundleRelease
 ```
-The AAB will be located in `androidApp/build/outputs/bundle/release/`.
+The AAB will be in `androidApp/build/outputs/bundle/release/`.
 
 ### iOS
 To run the iOS application:
@@ -106,9 +104,9 @@ To run the iOS application:
 
 To build for the App Store:
 1.  Open `iosApp/iosApp.xcodeproj` in Xcode.
-2.  Select a physical device or "Any iOS Device (arm64)".
-3.  Go to **Product** > **Archive**.
-4.  Once the archive is created, the Organizer window will open, allowing you to validate and distribute the app to TestFlight or the App Store.
+2.  Select "Any iOS Device (arm64)" as the target.
+3.  Go to **Product -> Archive**.
+4.  Once the archive is created, the Organizer window will open. Click **Distribute App** to upload to TestFlight or the App Store.
 
 ### Desktop (JVM)
 To run the desktop application:
@@ -136,29 +134,6 @@ To run the WebAssembly application in your default browser (with hot reload):
 To build a production distribution:
 ```bash
 ./gradlew :composeApp:wasmJsBrowserDistribution
-```
-
-### Console (Native)
-To run the console application, use the task specific to your operating system:
-
-**macOS (Apple Silicon / Arm64):**
-```bash
-./gradlew :composeApp:runDebugExecutableMacosArm64
-```
-
-**macOS (Intel / x64):**
-```bash
-./gradlew :composeApp:runDebugExecutableMacosX64
-```
-
-**Linux (x64):**
-```bash
-./gradlew :composeApp:runDebugExecutableLinuxX64
-```
-
-**Windows (MinGW x64):**
-```bash
-./gradlew :composeApp:runDebugExecutableMingwX64
 ```
 
 ## License
