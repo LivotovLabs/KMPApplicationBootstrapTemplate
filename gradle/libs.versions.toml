@@ -1,22 +1,55 @@
 [versions]
+app-appId = "com.watermelonkode.androidapp"
+app-name = "KMPApplicationTemplate"
+app-versionCode = "1"
+app-versionName = "1.0.0"
+app-desktop-entrypoint = "com.watermelonkode.simpletemplate.MainKt"
+
 agp = "9.0.0"
+
 android-compileSdk = "36"
-android-minSdk = "24"
+android-minSdk = "28"
 android-targetSdk = "36"
-androidx-activity = "1.12.2"
+android-namespace = "com.watermelonkode.simpletemplate"
+app-namespace = "com.watermelonkode.androidapp"
+
+androidx-activity = "1.12.4"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"
 androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.9.6"
 androidx-testExt = "1.3.0"
-composeMultiplatform = "1.10.0"
+composeMultiplatform = "1.10.1"
 junit = "4.13.2"
-kotlin = "2.3.0"
+kotlin = "2.3.10"
+kotlinx-coroutines = "1.10.2"
+kotlinxCoroutinesCore = "1.10.2"
+kotlinx-datetime = "0.7.1"
+kotlinx-serialization = "1.10.0"
 material3 = "1.10.0-alpha05"
 lifecycleRuntimeKtx = "2.10.0"
-composeBom = "2026.01.00"
+composeBom = "2026.02.00"
+splashscreen = "1.2.0"
+
+
+koin = "4.1.1"
+koin-plugin = "0.3.0"
+
+oskitCompose = "4.1.0-beta5"
+oskitKmp = "5.1.0-beta4"
+
+ktor = "3.4.0"
+
+logger = "2.1.0"
+
+
 
 [libraries]
+kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -43,6 +76,26 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
+
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
+
+oskit-compose = { module = "com.outsidesource:oskit-compose", version.ref = "oskitCompose" }
+oskit-kmp = { module = "com.outsidesource:oskit-kmp", version.ref = "oskitKmp" }
+
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+
+logger = { module = "com.diamondedge:logging", version.ref = "logger" }
+
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -52,3 +105,7 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kmpAppIconGenerator = { id = "io.github.qamarelsafadi.kmp.app.icon.generator", version = "1.2.6" }
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version = "0.15.2" }

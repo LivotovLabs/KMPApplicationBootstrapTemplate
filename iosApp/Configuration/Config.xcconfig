@@ -1,7 +1,8 @@
-TEAM_ID=
+// This file is auto-generated from gradle/libs.versions.toml
+// Do not modify directly.
 
-PRODUCT_NAME=Simple Template
-PRODUCT_BUNDLE_IDENTIFIER=com.watermelonkode.simpletemplate.SimpleTemplate$(TEAM_ID)
+PRODUCT_NAME=KMPApplicationTemplate
+PRODUCT_BUNDLE_IDENTIFIER=com.watermelonkode.androidapp
 
 CURRENT_PROJECT_VERSION=1
-MARKETING_VERSION=1.0
+MARKETING_VERSION=1.0.0

@@ -1,4 +1,4 @@
-rootProject.name = "SimpleTemplate"
+rootProject.name = "KMPApplicationTemplate"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
