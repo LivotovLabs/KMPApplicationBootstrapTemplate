@@ -12,6 +12,15 @@ This project is built on the latest KMP structure compatible with the **Android 
 *   **Modernization**: Heavily inspired by the [watermelonKode/kmp-wizard-template](https://github.com/watermelonKode/kmp-wizard-template), incorporating migration strategies for AGP 9 and modern multiplatform best practices.
 *   **Libraries**: This project also relies heavily on **[OSKit-KMP](https://github.com/outsidesource/OSKit-KMP)** and **[OSKit-Compose-KMP](https://github.com/outsidesource/OSKit-Compose-KMP)** as its core framework foundation. It also uses **[KmLogging](https://github.com/DiamondEdge1/KmLogging)** for robust multiplatform logging. These libraries provide solid implementations for common architectural patterns and logging needs.
 
+## Version Information
+
+*   **Kotlin:** 2.3.10
+*   **AGP Plugin:** 9.1.0
+*   **Koin:** 4.1.1
+*   **Ktor:** 3.4.1
+*   **OSKIT:** 5.1.0
+*   **OSKIT Compose:** 4.1.1
+
 ---
 
 ## Getting Started
