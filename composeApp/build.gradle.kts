@@ -1,13 +1,25 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import com.codingfeline.buildkonfig.compiler.FieldSpec
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidKmpLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kmpAppIconGenerator)
+    alias(libs.plugins.buildkonfig)
+}
+
+buildkonfig {
+    packageName = "com.watermelonkode.simpletemplate"
+    objectName = "BuildKonfig"
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "APP_VERSION", libs.versions.app.versionName.get())
+        buildConfigField(FieldSpec.Type.INT, "APP_BUILD_NUMBER", libs.versions.app.versionCode.get())
+    }
 }
 
 kotlin {
@@ -46,8 +58,8 @@ kotlin {
             binaryOption("bundleVersion", libs.versions.app.versionCode.get())
 
             freeCompilerArgs += listOf(
-                "-Xbuild-version-string=${libs.versions.app.versionName.get()}", // e.g. "1.0.0"
-                "-Xbuild-number=${libs.versions.app.versionCode.get()}", // build number
+                "-Xbuild-version-string=${libs.versions.app.versionName.get()}",
+                "-Xbuild-number=${libs.versions.app.versionCode.get()}",
             )
         }
     }
@@ -56,10 +68,6 @@ kotlin {
         val commonMain by getting
         val commonTest by getting
 
-        androidMain.dependencies {
-            implementation(libs.compose.uiToolingPreview)
-            implementation(libs.androidx.activity.compose)
-        }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
@@ -70,25 +78,69 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization)
+            implementation(libs.kotlinx.datetime)
+
+            // Logger
+            implementation(libs.logger)
+
             // DI
             implementation(libs.koin.core)
 
             // OSKIT
             api(libs.oskit.kmp)
             implementation(libs.oskit.compose)
+
+            // Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.serialization.json)
+            implementation(libs.ktor.client.logging)
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
 
+        androidMain.dependencies {
+            implementation(libs.compose.uiToolingPreview)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.kotlinx.coroutines.android)
+
+            // Ktor Platform Specific
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.kotlinx.coroutines.android)
+        }
+
+        val iosMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+            }
+        }
+        
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        
+        iosArm64Main.dependsOn(iosMain)
+        iosSimulatorArm64Main.dependsOn(iosMain)
+
         val desktopMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+
+                // Ktor Platform Specific
+                implementation(libs.ktor.client.okhttp)
             }
         }
 
-        val wasmJsMain by getting
+        val wasmJsMain by getting {
+            dependencies {
+                // Ktor Platform Specific
+                implementation(libs.ktor.client.cio)
+            }
+        }
 
     }
 }
