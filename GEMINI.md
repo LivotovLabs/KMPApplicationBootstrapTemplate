@@ -169,16 +169,12 @@ class ApiServiceImpl(private val http: HttpService) : ApiService {
 }
 ```
 
-### 3. Jetpack Compose UI & Components
-*   Use custom Design System definitions (`AppTheme.colors`, `AppTheme.typography`, `AppTheme.dimensions`) via `CompositionLocalProvider`.
-*   Avoid hardcoded colors or text styles.
-*   Delegate all actions to the Interactor.
-*   **Component Strategy (Shared vs. Local):**
-    *   **Shared Components (`ui/design/components/`):** Reusable widgets meant to be used across multiple features (e.g., `AppBaseButton`, `ErrorMessageSnackbar`). These **MUST be stateless**. Pass data and event callbacks (e.g., `onClick: () -> Unit`) as parameters.
-    *   **Local Components (`ui/screen/<feature>/`):** Composables specific to a single feature (e.g., a specific list item or header configuration). Use these to break down large screen files. **Rule:** If a local component's composable function exceeds 5 lines of code, it MUST be moved to its own separate file within the feature directory to keep every UI file as simple and small as possible.
-*   **Component State Management:**
-    *   If a component is simple, pass the state down from the parent screen's `ViewInteractor`.
-    *   If a component requires its own business logic, complex state management, or independent lifecycle (e.g., a standalone widget, complex form, or a dedicated BottomSheet), **it must introduce its own `ViewInteractor`**. Do not bloat the parent screen's Interactor with child component logic.
+### 3. Jetpack Compose UI & Components (Composables UI Edition)
+*   **Design System**: Use `AppTheme.colors`, `AppTheme.typography`, and `AppTheme.dimensions` via `CompositionLocalProvider`.
+*   **Composables Core**: Use `com.composables.core` for accessible, unstyled primitives.
+*   **Lucide Icons**: Use `com.composables.icons.lucide.Lucide` (e.g., `Lucide.TriangleAlert`).
+*   **Material Compatibility**: `AppTheme` automatically wraps `MaterialTheme` to support legacy Material 3 components while providing custom tokens.
+*   **Shared Components**: Reusable widgets live in `ui/design/components/` and should be stateless.
 
 ```kotlin
 @Composable
@@ -187,29 +183,17 @@ fun FeatureScreen(
 ) {
     val state = interactor.collectAsState()
 
-    Screen(
-        appToolbarContent = {
-            AppPrimaryTopBar(
-                title = "Feature",
-                showBackButton = true,
-                onBackClicked = { interactor.onBackClicked() }
-            )
-        }
-    ) {
+    Scaffold(containerColor = AppTheme.colors.background) {
         Column(modifier = Modifier.fillMaxSize().padding(AppTheme.dimensions.screenPadding)) {
-            if (state.isLoading) {
-                CircularProgressIndicator(color = AppTheme.colors.primary)
-            } else {
-                Text(
-                    text = state.title,
-                    style = AppTheme.typography.h1,
-                    color = AppTheme.colors.textColor
-                )
-                AppBaseButton(
-                    label = "Refresh",
-                    onClick = { interactor.onRefreshClicked() }
-                )
-            }
+             Text(
+                 text = state.title,
+                 style = AppTheme.typography.h1,
+                 color = AppTheme.colors.onBackground
+             )
+             AppBaseButton(
+                 label = "Action",
+                 onClick = { interactor.onAction() }
+             )
         }
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.outsidesource.oskitcompose.interactor.collectAsState
 import com.outsidesource.oskitcompose.lib.rememberInject
 import com.outsidesource.oskitcompose.router.RouteSwitch
+import com.watermelonkode.simpletemplate.ui.design.AppTheme
 import com.watermelonkode.simpletemplate.ui.screen.details.DetailsScreen
 import com.watermelonkode.simpletemplate.ui.screen.home.HomeScreen
 import org.koin.core.parameter.parametersOf
@@ -29,10 +30,12 @@ fun App(
 ) {
     val state = interactor.collectAsState()
 
-    RouteSwitch(coordinator) {
-        when (it) {
-            Route.Home -> Authorized(state) { HomeScreen() }
-            is Route.Details -> Authorized(state) { DetailsScreen(it.id) }
+    AppTheme {
+        RouteSwitch(coordinator) {
+            when (it) {
+                Route.Home -> Authorized(state) { HomeScreen() }
+                is Route.Details -> Authorized(state) { DetailsScreen(it.id) }
+            }
         }
     }
 }
