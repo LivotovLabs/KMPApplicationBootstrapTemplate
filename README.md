@@ -4,6 +4,18 @@ This is a comprehensive **Kotlin Multiplatform (KMP)** project template designed
 
 The goal is to provide a **minimal-batteries-included** starting point. It solves common architectural challenges—such as navigation, persistent settings, and logging—without enforcing a bloated framework, allowing you to focus on your application's unique features.
 
+## Project Variants
+
+This template is available in two distinct flavors:
+
+*   **`main` (Material 3)**: The default version using standard Google Material 3 components and theming. Best for projects that want to leverage the established Material design system.
+*   **`composables-ui` (Composables UI Kit)**: A modern, unstyled version using **[Composables Core](https://composables.com)** and **Lucide Icons**. Best for projects requiring a fully custom design system without Material 3's visual constraints.
+
+To switch to the Composables UI version:
+```bash
+git checkout composables-ui
+```
+
 ## Project Foundation
 
 This project is built on the latest KMP structure compatible with the **Android Gradle Plugin (AGP) 9**.
