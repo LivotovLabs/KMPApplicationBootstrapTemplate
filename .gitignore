@@ -18,10 +18,6 @@ generated/
 # Kotlin specific
 .kotlin/
 
-# Gradle Wrapper (optional)
-gradle/wrapper/gradle-wrapper.properties
-gradle/wrapper/gradle-wrapper.jar
-
 # Local configuration
 local.properties
 keystore.properties
