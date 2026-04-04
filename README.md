@@ -4,6 +4,18 @@ This is the **Composables UI** version of the KMP project template. It replaces 
 
 The goal is to provide a **minimal-batteries-included** starting point with a custom design system.
 
+## Project Variants
+
+This template is available in two distinct flavors:
+
+*   **`main` (Material 3)**: The default version using standard Google Material 3 components and theming. Best for projects that want to leverage the established Material design system.
+*   **`composables-ui` (Composables UI Kit)**: A modern, unstyled version using **[Composables Core](https://composables.com)** and **Lucide Icons**. Best for projects requiring a fully custom design system without Material 3's visual constraints.
+
+To switch back to the Material 3 version:
+```bash
+git checkout main
+```
+
 ## Project Foundation
 
 *   **UI Framework**: Jetpack Compose Multiplatform with **Composables Core**.
