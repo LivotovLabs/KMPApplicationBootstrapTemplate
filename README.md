@@ -28,6 +28,7 @@ This project is built on the latest KMP structure compatible with the **Android 
 
 *   **Kotlin:** 2.3.20
 *   **AGP Plugin:** 9.1.0
+*   **Google Services** 4.4.4
 *   **Compose Multiplatform:** 1.10.3
 *   **Koin:** 4.2.0
 *   **Ktor:** 3.4.2
@@ -130,16 +131,24 @@ Configure signing in `androidApp/build.gradle.kts`. Credentials are loaded from 
 
 **Keys**: `android.key.store`, `android.key.store.password`, `android.key.alias`, `android.key.password`.
 
+### Google Services (Optional)
+*   **Android**: Drop the google-services.json into `androidApp` folder, then uncomment the google services plugin in `androidApp/build.gradle.kts`
+*   **iOS**: Drop the google-services.plist into `iosApp/iosApp` folder, import it into XCode project, then add Firebase ios SDK as per Firebase manual
+
 ### iOS Configuration
 *   **Auto-Generated**: `iosApp/Configuration/Config.xcconfig` is generated automatically from `libs.versions.toml` by the `syncIosConfig` task. **Do not edit it manually.**
 
 ### Application Icons
-Icons are managed by the `kmp-app-icon-generator` plugin.
+For Android and iOS targets, icons are managed by the `kmp-app-icon-generator` plugin. Other targets
+require manual steps:
 
-1.  **Source**: Place `icon.svg` or `icon.png` in `composeApp/src/commonMain/composeResources/drawable/`.
-2.  **Generate**: Run `./gradlew :composeApp:generateIcons --no-configuration-cache`.
-    *   Populates Android `mipmap` and iOS `Assets.xcassets`.
-3.  **Desktop**: Manually replace icons in `composeApp/src/desktopMain/resources/icons/` (`icon.icns`, `icon.ico`, `icon.png`).
+1.  **Android and iOS targets**:
+    *   Place `icon.svg` or 1024x1024 `icon.png` in `composeApp/src/commonMain/composeResources/drawable/`.
+    *   Run `./gradlew :composeApp:generateIcons --no-configuration-cache`
+    *   The task will generate platform icon resources in: Android - `mipmap` and iOS - `Assets.xcassets`.
+    
+2.   **Desktop target**: 
+     *  Manually replace icons in `composeApp/src/desktopMain/resources/icons/` (`icon.icns`, `icon.ico`, `icon.png`).
 
 ---
 

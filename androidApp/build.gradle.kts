@@ -4,6 +4,7 @@ import java.io.FileInputStream
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    // alias(libs.plugins.googleServices) // Uncomment to add google services support once you drop google.services.json config into androidApp folder
 }
 
 android {
