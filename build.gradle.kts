@@ -58,4 +58,11 @@ allprojects {
     tasks.withType<KotlinCompile> {
         dependsOn(rootProject.tasks.named("syncIosConfig"))
     }
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin" && requested.name.startsWith("kotlin-stdlib")) {
+                useVersion("2.4.0")
+            }
+        }
+    }
 }
