@@ -189,8 +189,11 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(Theme[spacing][elementPadding]),
         ) {
             Text("Appearance", style = Theme[typography][h3])
-            Button(onClick = { interactor.onSaveClicked() }, style = ButtonStyle.Primary) {
-                Text("Save")
+            Button(
+                onClick = { interactor.onThemeModeSelected(ThemeMode.Dark) },
+                style = ButtonStyle.Primary,
+            ) {
+                Text("Use dark theme")
             }
         }
     }
