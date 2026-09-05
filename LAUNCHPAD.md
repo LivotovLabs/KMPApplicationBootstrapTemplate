@@ -285,8 +285,12 @@ project file for no gain.
 ## 4. App icon
 
 The source of truth is a single file in `composeApp/src/commonMain/composeResources/drawable/`,
-named `icon.svg` **or** `icon.png`. The template ships both — **delete the one you are not using**,
-or the generator's choice is ambiguous.
+named `icon.svg` (preferred) **or** `icon.png`.
+
+> Note that `generateIcons` rasterizes an SVG source into `icon.png` in that same folder, so an
+> `icon.png` appearing after a build is *output*, not a second input — it is git-ignored for exactly
+> that reason. If you supply a PNG as your source instead, remove that rule from `.gitignore` so it
+> is tracked.
 
 **If the user supplied a file:** copy it in under the right name (SVG preferred; PNG must be square
 and ≥ 1024×1024).
@@ -396,7 +400,8 @@ These files belong to the template, not to the new app.
 *   `LAUNCHPAD.md` — this file. Last thing you do.
 *   `.github/FUNDING.yml` — funds the *template's* author.
 *   `composeApp/src/commonMain/composeResources/.DS_Store`
-*   Whichever of `drawable/icon.png` / `drawable/icon.svg` you did not use (§4).
+*   `drawable/icon.svg` **only if** the user supplied a PNG source instead — otherwise keep it, it
+    is the icon source. Never delete both.
 
 **Rewrite `README.md`:** replace the title, the intro, **Project Foundation**, **Version
 Information** and the whole **Release Notes** section — that is the template's history, not the

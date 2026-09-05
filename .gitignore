@@ -124,3 +124,8 @@ $RECYCLE.BIN/
 # Firebase configuration files
 google-services.json
 GoogleService-Info.plist
+
+# `generateIcons` rasterizes composeResources/drawable/icon.svg into icon.png beside it, so that
+# file is build output rather than source. If you use a PNG as your icon source instead of an SVG,
+# drop this rule (or `git add -f` the file) so your real source icon gets tracked.
+composeApp/src/commonMain/composeResources/drawable/icon.png
