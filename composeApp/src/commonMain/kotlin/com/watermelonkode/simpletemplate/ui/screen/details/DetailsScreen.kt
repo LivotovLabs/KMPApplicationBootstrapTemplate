@@ -12,6 +12,7 @@ import com.outsidesource.oskitcompose.interactor.collectAsState
 import com.outsidesource.oskitcompose.lib.rememberInject
 import com.watermelonkode.simpletemplate.ui.design.components.AppScreen
 import com.watermelonkode.simpletemplate.ui.design.components.AppToolbar
+import com.watermelonkode.simpletemplate.ui.design.appPointerCursor
 import com.watermelonkode.simpletemplate.ui.design.elementPadding
 import com.watermelonkode.simpletemplate.ui.design.h2
 import com.watermelonkode.simpletemplate.ui.design.spacing
@@ -46,6 +47,7 @@ fun DetailsScreen(
 
             Button(
                 onClick = { interactor.homeClicked() },
+                modifier = Modifier.appPointerCursor(),
                 style = ButtonStyle.Secondary
             ) {
                 Text("Close")

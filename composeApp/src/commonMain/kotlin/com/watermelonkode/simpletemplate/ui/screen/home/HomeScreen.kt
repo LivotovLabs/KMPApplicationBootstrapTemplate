@@ -21,6 +21,7 @@ import com.outsidesource.oskitcompose.lib.rememberInject
 import com.watermelonkode.simpletemplate.domain.model.settings.ThemeMode
 import com.watermelonkode.simpletemplate.ui.design.components.AppScreen
 import com.watermelonkode.simpletemplate.ui.design.components.AppToolbar
+import com.watermelonkode.simpletemplate.ui.design.appPointerCursor
 import com.watermelonkode.simpletemplate.ui.design.elementPadding
 import com.watermelonkode.simpletemplate.ui.design.h2
 import com.watermelonkode.simpletemplate.ui.design.spacing
@@ -66,6 +67,7 @@ fun HomeScreen(
 
             Button(
                 onClick = { interactor.onDetailsClicked("123") },
+                modifier = Modifier.appPointerCursor(),
                 style = ButtonStyle.Primary
             ) {
                 Text("Open Details")
@@ -82,7 +84,7 @@ fun HomeScreen(
  */
 @Composable
 private fun ThemeModeButton(themeMode: ThemeMode, onClick: () -> Unit) {
-    IconButton(onClick = onClick, style = ButtonStyle.Ghost) {
+    IconButton(onClick = onClick, modifier = Modifier.appPointerCursor(), style = ButtonStyle.Ghost) {
         Icon(
             imageVector = when (themeMode) {
                 ThemeMode.System -> Lucide.SunMoon

@@ -66,6 +66,13 @@ data class AppColorPalette(
     val ring: Color,
     /** Handle colour for selected text. */
     val textSelectionHandle: Color,
+    /**
+     * Solid hue for press/hover feedback on normal surfaces. No alpha of its own -- the platform
+     * decides how strong the effect is. See [appPressIndication].
+     */
+    val pressHighlight: Color,
+    /** Solid hue for press/hover feedback on primary and destructive surfaces. */
+    val pressHighlightInverse: Color,
 )
 
 val AppLightPalette = AppColorPalette(
@@ -94,6 +101,8 @@ val AppLightPalette = AppColorPalette(
     scrim = Color.Black.copy(alpha = 0.38f),
     ring = Color.Black.copy(alpha = 0.24f),
     textSelectionHandle = Color.Black,
+    pressHighlight = Color.Black,
+    pressHighlightInverse = Color.White,
 )
 
 val AppDarkPalette = AppColorPalette(
@@ -122,4 +131,6 @@ val AppDarkPalette = AppColorPalette(
     scrim = Color.Black.copy(alpha = 0.48f),
     ring = Color(0xFFE5E5E5).copy(alpha = 0.28f),
     textSelectionHandle = Color(0xFFE5E5E5),
+    pressHighlight = Color(0xFFE5E5E5),
+    pressHighlightInverse = Color(0xFF171717),
 )

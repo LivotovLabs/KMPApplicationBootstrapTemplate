@@ -81,7 +81,8 @@ composeApp/src/
   │   │   └── device/           # Platform-specific service impls
   │   ├── ui/                   # Presentation Layer
   │   │   ├── design/           # AppTheme + Colors/Shapes/Typography/Spacing tokens
-  │   │   │   └── components/   # Shared stateless widgets (AppScreen, AppToolbar)
+  │   │   │                     # Platform.kt/PressEffects.kt/Metrics.kt = platform feel
+  │   │   │   └── components/   # Shared stateless widgets (AppScreen, AppToolbar, AppScrollbar)
   │   │   ├── route/            # Coordinators & Routes
   │   │   └── screen/           # Screens & ViewInteractors (grouped by feature)
   │   ├── shared/               # Common Utilities (Formatting, Extensions)
@@ -196,6 +197,22 @@ Box(Modifier.background(Theme[colors][primaryColor]).padding(Theme[spacing][scre
 *   Composables UI has **no `Scaffold`**. Every screen's root is `AppScreen(toolbar = { AppToolbar(...) }) { ... }` from `ui/design/components/`.
 *   Components resize themselves for the current input method (`LocalInteractionMode`): rounder and roomier under a finger, tighter under a pointer. Do not fight this with fixed sizes.
 *   A missing token throws at **composition** time, not compile time -- always run the app after adding one.
+
+**Platform feel.** The app is deliberately not identical across platforms. `appPlatform`
+(`ui/design/Platform.kt`) is the single switch, and it already drives press effects, haptics,
+shapes, type, spacing, tap targets, toolbar metrics and scrollbars.
+
+*   Branch on `appPlatform` for "what do users of this OS expect". Branch on `LocalInteractionMode`
+    only for "how big should a tap target be right now" -- an Android tablet with a mouse is still
+    `AppPlatform.Android`.
+*   Never hardcode a press effect. `appPressIndication()` feeds the theme's indication tokens, and
+    every Composables UI control reads them, so press feedback is already native everywhere.
+*   Structural sizes go in `Metrics.kt` as plain values, not theme tokens: they describe the
+    platform, not the brand. Colours, shapes, type and spacing stay in the theme.
+*   Add new platform differences to the existing `when (appPlatform)` blocks rather than introducing
+    `expect`/`actual` -- everything needed is available in `commonMain`, and one readable file beats
+    four near-identical `actual`s.
+*   Pass `Modifier.appPointerCursor()` to clickable components. It is a no-op off web by design.
 *   Delegate all actions to the Interactor.
 *   **Component Strategy (Shared vs. Local):**
     *   **Shared Components (`ui/design/components/`):** Reusable widgets meant to be used across multiple features (e.g., `AppScreen`, `AppToolbar`). These **MUST be stateless**. Pass data and event callbacks (e.g., `onClick: () -> Unit`) as parameters. Do not wrap a Composables UI component merely to rename its parameters -- those components already read the theme. Add a shared component only when it encodes a real app-wide decision.

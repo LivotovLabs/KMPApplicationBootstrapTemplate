@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.composables.compose.ripple.rememberRippleIndication
 import com.composables.interactioncapabilities.currentInteractionCapabilities
 import com.composables.ui.theme.ColorScheme
 import com.composables.ui.theme.InteractionMode
@@ -77,6 +76,10 @@ import com.watermelonkode.simpletemplate.domain.model.settings.ThemeMode
  * To restyle the app, edit [AppColorPalette], [AppShapes], [appTypography] and [appSpacing] --
  * not this file.
  *
+ * Platform feel is wired in here too: shapes, type, spacing and the press effect all come from
+ * [appPlatform], so a Material ripple and pill buttons on Android become a UIKit highlight and
+ * rounded rectangles on iOS with no call-site changes. See [appPressIndication] and [AppMetrics].
+ *
  * @param themeMode Which colour scheme to use. Comes from the persisted user setting; see
  *   [com.watermelonkode.simpletemplate.domain.interactor.AppSettingsInteractor].
  */
@@ -113,12 +116,11 @@ internal val AppThemeDefinition: ThemeComposable = buildTheme {
     val useDarkColors = LocalColorScheme.current == ColorScheme.Dark
     val palette = if (useDarkColors) AppDarkPalette else AppLightPalette
 
-    // Components resize for the current input method: rounder and roomier under a finger, tighter
-    // under a mouse pointer. An explicit LocalInteractionMode wins, so a screen can force either.
+    // Still resolved and provided below because Composables UI components read it to size their
+    // own tap targets. Our shapes and type key off the platform instead: an Android tablet driven
+    // by a mouse should still look like Android, even while its controls tighten up for a pointer.
     val interactionMode = LocalInteractionMode.current
         ?: if (currentInteractionCapabilities().hasPointer) InteractionMode.Pointer else InteractionMode.Touch
-    val useTouchSizes = interactionMode == InteractionMode.Touch
-    val appShapes = if (useTouchSizes) AppTouchShapes else AppPointerShapes
 
     properties[colors] = mapOf(
         backgroundColor to animatedColor(useDarkColors, palette.background),
@@ -184,23 +186,22 @@ internal val AppThemeDefinition: ThemeComposable = buildTheme {
     properties[textSelectionColors] =
         mapOf(com.composables.ui.theme.defaultTextSelectionColors to selectionColors)
 
-    val pressIndication = rememberRippleIndication(
-        if (useDarkColors) Color(0xFFE5E5E5).copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.08f),
-    )
+    // Material ripple on Android, UIKit-style highlight on iOS, hover+press tint on desktop and
+    // web -- plus a haptic tick on mobile. Every stock Composables UI control reads these tokens,
+    // so this single wiring makes all of them feel native.
+    val pressIndication = appPressIndication(palette.pressHighlight)
     // For content on inverse or high-contrast surfaces, e.g. inside a primary button.
-    val pressIndicationOnInverse = rememberRippleIndication(
-        if (useDarkColors) Color(0xFF171717).copy(alpha = 0.10f) else Color.White.copy(alpha = 0.12f),
-    )
+    val pressIndicationOnInverse = appPressIndication(palette.pressHighlightInverse)
     properties[indications] = mapOf(
         com.composables.ui.theme.defaultIndication to pressIndication,
         inverseIndication to pressIndicationOnInverse,
     )
 
     // App-specific properties, on top of the tokens Composables UI defines.
-    properties[typography] = appTypography(useTouchSizes)
+    properties[typography] = appTypography
     properties[spacing] = appSpacing
 
-    defaultTextStyle = appBodyTextStyle(useTouchSizes)
+    defaultTextStyle = appBodyTextStyle
     // Composables UI's own theme leaves this Unspecified, which makes a bare Text render
     // unpredictably. Anchoring it to the background's content colour is a saner default.
     defaultContentColor = palette.onBackground

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import com.composables.ui.theme.backgroundColor
 import com.composables.ui.theme.colors
 import com.composeunstyled.theme.Theme
+import com.watermelonkode.simpletemplate.ui.design.AppMetrics
 
 /**
  * The root container for a screen: paints the themed background and handles safe-area insets.
@@ -30,6 +32,10 @@ import com.composeunstyled.theme.Theme
  * ```
  *
  * Stateless by design -- pass state and callbacks in from the screen's `ViewInteractor`.
+ *
+ * Insets are handled per platform: mobile respects the system safe area (status bar, navigation
+ * bar, cutout, keyboard), while desktop and web -- where `WindowInsets.safeDrawing` is always zero
+ * -- get [AppMetrics.windowPadding] instead so content never sits flush against the window edge.
  *
  * @param toolbar Optional toolbar drawn above the content, typically an [AppToolbar]. When present
  *   it handles the top inset itself, so only the bottom and side insets are applied to [content].
@@ -60,7 +66,8 @@ fun AppScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .windowInsetsPadding(contentInsets),
+                .windowInsetsPadding(contentInsets)
+                .padding(AppMetrics.windowPadding),
             content = content,
         )
     }

@@ -48,6 +48,8 @@ This project is built on the latest KMP structure compatible with the **Android 
 *   **Fixed the configuration cache for iOS builds**: `kmp-app-icon-generator` wires `generateIcons` onto every Kotlin/Native link task, and that task is not configuration-cache compatible -- which failed every iOS build and `:composeApp:allTests`. The dependency edge is now cut in `composeApp/build.gradle.kts`; run icon generation on demand instead.
 *   **Removed dead code**: the unused Material 3 theme in `androidApp` (`ui/theme/`) and its `colors.xml` palette.
 *   **Modernized the Gradle DSL**: replaced the `by getting` source-set accessors that Gradle 10 removes.
+*   **Platform-native feel**: press effects (Material ripple / iOS highlight / desktop hover), haptics, shapes, type scale, spacing, tap targets, toolbar metrics and scrollbars now follow the host platform. See [Platform feel](#platform-feel).
+*   **Fixed the iOS Xcode build**: `ComposeApp` is a static framework, so the app target has to link `sqlite3` itself for OSKit's KV storage. Without it Xcode failed with "symbol(s) not found for architecture arm64" — meaning the README's "open in Xcode and run" never worked. `OTHER_LDFLAGS` is now part of the generated `Config.xcconfig`.
 *   **AI guidelines moved to `CLAUDE.md`**; `GEMINI.md` is now just a pointer to it.
 
 ### Version 1.1
@@ -153,6 +155,48 @@ AppScreen(
 
 Components adapt to the current input method via `LocalInteractionMode`: bigger and rounder under a
 finger, tighter under a mouse pointer. Prefer letting them size themselves.
+
+#### Platform feel
+
+The design system deliberately does **not** look the same everywhere. One switch,
+`appPlatform` in `ui/design/Platform.kt` (resolved from OSKit's `Platform.current`), drives every
+platform difference:
+
+| | Android | iOS | Desktop / Web |
+|---|---|---|---|
+| Press effect | Material ripple | Instant tint, slow fade, no hover | Tint on hover, stronger on press |
+| Haptics | Yes | Yes | n/a |
+| Buttons | Pill | 12dp rounded rect | 6dp rounded rect |
+| Dialogs | 28dp | 14dp | 10dp |
+| Toolbar | 56dp, leading title, 22sp | 44pt, **centred** title, 17sp semibold | 44dp, leading title, 15sp |
+| Back icon | Arrow | Chevron | Arrow |
+| Body text | 16sp | 17pt | 14–15sp |
+| Screen padding | 16dp | 16dp | 24dp |
+| Min tap target | 48dp | 44pt | 32dp |
+| Scrollbars | System, transient | System, transient | Persistent |
+| Cursor | n/a | n/a | Arrow (desktop), hand (web) |
+
+Where it lives:
+
+* **`PressEffects.kt`** — `appPressIndication()` returns the platform's press feedback. This is the
+  highest-leverage file: Composables UI components resolve their press effect from the theme's
+  indication tokens, so every stock `Button`, `IconButton`, `Tabs`, `NavigationBarItem` and menu row
+  becomes native at once, with no component wrapping. On Android it really is the Material ripple —
+  `rememberRippleIndication` wraps `androidx.compose.material.ripple`.
+* **`Metrics.kt`** — structural sizes (toolbar height, minimum tap target, window padding). These
+  are plain values, not theme tokens, because they describe the *platform*, not your brand.
+* **`Platform.kt`** — the `AppPlatform` switch, plus `AppFeel` for taste-level toggles. Set
+  `AppFeel.HAPTIC_FEEDBACK_ON_PRESS = false` to stop the tap tick.
+
+`appPlatform` is not the same thing as `LocalInteractionMode`, which Composables UI uses to describe
+the current **input device**. An Android tablet driven by a mouse is still Android and still gets a
+ripple and pill buttons, while its controls may tighten up for a pointer. Use the platform for "what
+do users of this OS expect" and interaction mode for "how big should a tap target be right now".
+
+Two things the library keeps from us: `Button` hardcodes its heights (48dp touch / 36dp pointer) and
+applies a 0.98 scale-down on press on every platform. The press *effect* is fully native, which is
+the part users notice, but those two details are uniform. `AppToolbar` is built from primitives
+precisely because `Toolbar` hardcoded 64dp and a 20sp title the same way.
 
 #### Theme mode
 

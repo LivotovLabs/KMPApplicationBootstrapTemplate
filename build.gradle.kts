@@ -47,6 +47,12 @@ val syncIosConfig by tasks.registering {
 
             CURRENT_PROJECT_VERSION=$versionCode
             MARKETING_VERSION=$versionName
+
+            // ComposeApp is a static framework, so symbols it references have to be resolved when
+            // the app itself links. OSKit's KV storage reaches sqlite3 through sqliter, and the
+            // -lsqlite3 in composeApp/build.gradle.kts only covers the framework's own link step --
+            // without this the Xcode build fails with "symbol(s) not found for architecture arm64".
+            OTHER_LDFLAGS=$(inherited) -lsqlite3
         """.trimIndent()
 
         configFile.writeText(configContent)

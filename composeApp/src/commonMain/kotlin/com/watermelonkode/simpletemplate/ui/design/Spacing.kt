@@ -13,7 +13,7 @@ import com.composeunstyled.theme.ThemeToken
  * ```
  *
  * Prefer these tokens over literal `.dp` values in screens -- that is what keeps a rebrand to a
- * single-file change.
+ * single-file change, and it is how content gets the right density on each platform.
  */
 val spacing: ThemeProperty<Dp> = ThemeProperty("spacing")
 
@@ -26,8 +26,20 @@ val elementPadding: ThemeToken<Dp> = ThemeToken("element_padding")
 /** Tight gap, e.g. between an icon and its label. */
 val smallPadding: ThemeToken<Dp> = ThemeToken("small_padding")
 
-internal val appSpacing: Map<ThemeToken<Dp>, Dp> = mapOf(
-    screenPadding to 16.dp,
-    elementPadding to 12.dp,
-    smallPadding to 8.dp,
-)
+/**
+ * Pointer platforms are denser than touch ones: content sits further from the window edge but
+ * elements pack closer together, because a mouse does not need 48dp of slack.
+ */
+internal val appSpacing: Map<ThemeToken<Dp>, Dp> = if (appPlatform.isPointerFirst) {
+    mapOf(
+        screenPadding to 24.dp,
+        elementPadding to 10.dp,
+        smallPadding to 6.dp,
+    )
+} else {
+    mapOf(
+        screenPadding to 16.dp,
+        elementPadding to 12.dp,
+        smallPadding to 8.dp,
+    )
+}
