@@ -14,6 +14,32 @@ This document serves as the primary context bootstrap and reference guide for th
 
 ---
 
+## ⛔ Non-Negotiables
+
+Read this list before writing any code. Each item is here because getting it wrong has already
+broken this project at least once.
+
+1.  **Never import `androidx.compose.material*`.** The design system is Composables UI. Material is
+    only on the classpath as an OSKit transitive dependency. Use `com.composables.ui.components.*`.
+2.  **Never hardcode a colour, text style, shape or spacing value.** Read them through
+    `Theme[property][token]`. Add a token instead of a literal. See §3.
+3.  **A missing theme token throws at *composition* time, not compile time.** A clean build proves
+    nothing about the theme. Run the app after touching `ui/design/`.
+4.  **Bind services to their interface, not to themselves:**
+    `single { FooServiceImpl() } bind FooService::class`. Binding `bind FooServiceImpl::class` is
+    silently useless — every `get<FooService>()` then fails at *runtime*, and only when something
+    first injects it. This exact bug shipped undetected in this template.
+5.  **Every field in a persisted DTO needs a default value**, or settings written by an older build
+    stop deserializing after you add a field.
+6.  **Views hold no logic.** No business rules, no `if` on domain state beyond rendering, no
+    navigation calls. Delegate to the `ViewInteractor`.
+7.  **Services never throw.** Return `Outcome<Value, Error>` with a `sealed class` error type.
+8.  **Screens start with `AppScreen`.** Composables UI ships no `Scaffold`.
+9.  **Branch on `appPlatform` for platform conventions**, not on `LocalInteractionMode`. See §6.
+10. **Do not add `expect`/`actual`** unless you genuinely need a platform-only API. See §6.
+
+---
+
 ## 🏛 Architecture Pattern: VISCE
 
 The application implements the **VISCE** architecture (**V**iew, **I**nteractor, **S**ervice, **C**oordinator, **E**ntity). It is a clean, unidirectional data flow (UDF) architecture tailored for reactive UIs.
@@ -70,28 +96,43 @@ The application implements the **VISCE** architecture (**V**iew, **I**nteractor,
 
 ```text
 composeApp/src/
-  ├── commonMain/kotlin/com/example/app/
-  │   ├── domain/               # Pure business rules & abstractions
-  │   │   ├── interactor/       # App/Domain Interactors (e.g., AuthInteractor)
-  │   │   ├── model/            # Entities, Enums, Error sealed classes
-  │   │   └── service/          # Service Interfaces (e.g., ApiService)
-  │   ├── service/              # Infrastructure Implementations
-  │   │   ├── api/              # Ktor client, endpoints, DTOs
-  │   │   ├── datastore/        # KVStore, Preferences
-  │   │   └── device/           # Platform-specific service impls
-  │   ├── ui/                   # Presentation Layer
-  │   │   ├── design/           # AppTheme + Colors/Shapes/Typography/Spacing tokens
-  │   │   │                     # Platform.kt/PressEffects.kt/Metrics.kt = platform feel
-  │   │   │   └── components/   # Shared stateless widgets (AppScreen, AppToolbar, AppScrollbar)
-  │   │   ├── route/            # Coordinators & Routes
-  │   │   └── screen/           # Screens & ViewInteractors (grouped by feature)
-  │   ├── shared/               # Common Utilities (Formatting, Extensions)
-  │   └── DI.kt                 # Koin Dependency Injection modules
-  ├── androidMain/kotlin/com/example/app/
-  │   └── PlatformDI.kt         # Android specific DI module & actuals
-  └── iosMain/kotlin/com/example/app/
-      └── PlatformDI.kt         # iOS specific DI module & actuals
+  ├── commonMain/kotlin/com/watermelonkode/simpletemplate/
+  │   ├── DI.kt                     # commonModule() + initKoin() + expect platformModule()
+  │   ├── domain/                   # Pure business rules. No framework or platform types.
+  │   │   ├── interactor/           # App/Domain Interactors (AppSettingsInteractor)
+  │   │   ├── model/                # Entities, enums, error sealed classes (model/settings/…)
+  │   │   └── service/              # Service INTERFACES only (LoggingService, AppSettingsService)
+  │   ├── data/                     # Infrastructure. Implements the domain/service interfaces.
+  │   │   ├── core/                 # Shared plumbing (KtorClient)
+  │   │   └── service/              # Service IMPLEMENTATIONS (…ServiceImpl, incl. expect classes)
+  │   └── ui/
+  │       ├── app.kt                # App(): AppTheme + RouteSwitch. Register new screens here.
+  │       ├── router.kt             # sealed class Route + deep links
+  │       ├── coordinator.kt        # AppCoordinator: every navigation decision
+  │       ├── interactor.kt         # AppInteractor: app-wide UI state
+  │       ├── design/               # The design system — see §3 and §6
+  │       │   ├── AppTheme.kt       # buildTheme{} binding values to tokens. Rarely edited.
+  │       │   ├── Colors.kt  Shapes.kt  Typography.kt  Spacing.kt   # Brand — edit these
+  │       │   ├── Platform.kt  PressEffects.kt  Metrics.kt          # Platform feel — edit these
+  │       │   └── components/       # Shared stateless widgets (AppScreen, AppToolbar, AppScrollbar)
+  │       └── screen/<feature>/     # <Feature>Screen.kt + <Feature>ScreenViewInteractor.kt
+  ├── commonTest/kotlin/…           # Multiplatform tests
+  ├── androidMain/…/PlatformDI.kt   # actual platformModule() + actual class PlatformContext
+  ├── iosMain/…/PlatformDI.kt
+  ├── desktopMain/…/PlatformDI.kt
+  └── wasmJsMain/…/PlatformDI.kt
 ```
+
+Conventions that are easy to get wrong:
+
+*   The four files directly under `ui/` are **lowercase** (`app.kt`, `router.kt`, `coordinator.kt`,
+    `interactor.kt`). Everything else is `PascalCase.kt`. Keep it that way.
+*   Implementations live in `data/`, interfaces in `domain/service/`. There is no top-level
+    `service/` package, and routes are **not** in a `ui/route/` package.
+*   A platform-specific service implementation is an `expect class` in
+    `commonMain/data/service/FooServiceImpl.kt` with `actual`s named
+    `FooServiceImpl.android.kt` / `.ios.kt` / `.desktop.kt` / `.wasm.kt` in the matching source set.
+*   There is no `shared/` package yet. Create one for cross-cutting utilities if you need it.
 
 ---
 
@@ -159,16 +200,40 @@ data class ItemDto(val id: Int, val name: String) {
     fun toModel() = Item(id = id, title = name)
 }
 
-// In service/api/ApiService.kt
-class ApiServiceImpl(private val http: HttpService) : ApiService {
-    override suspend fun fetchItems(): Outcome<List<Item>, ApiError> {
-        val result = http.get<List<ItemDto>>("https://api.example.com/items")
-        
-        return when (result) {
+// In data/service/ItemServiceImpl.kt
+class ItemServiceImpl(private val client: KtorClient) : ItemService {
+    override suspend fun fetchItems(): Outcome<List<Item>, ApiError> =
+        when (val result = client.get<List<ItemDto>>("https://api.example.com/items")) {
             is Outcome.Ok -> Outcome.Ok(result.value.map { it.toModel() })
-            is Outcome.Error -> Outcome.Error(ApiError.NetworkError)
+            is Outcome.Error -> Outcome.Error(result.error.toApiError())
         }
+}
+
+// Translate transport errors into domain errors -- do not leak HttpError past the service.
+private fun HttpError.toApiError(): ApiError = when (this) {
+    is HttpError.ServerError -> when (code) {
+        404 -> ApiError.NotFound
+        else -> ApiError.ServerError(code)
     }
+    is HttpError.ClientException -> ApiError.NetworkError
+}
+```
+
+**`KtorClient` (`data/core/KtorClient.kt`)** is the only HTTP entry point. It is preconfigured with
+content negotiation, pretty-printed JSON logging through `LoggingService`, and `Outcome` returns, so
+services never touch Ktor directly.
+
+*   Extension functions: `get<T>`, `post<T, R>`, `patch<T, R>`, `put<T, R>`, `delete<T>` — each
+    returns `Outcome<T, HttpError>` and never throws.
+*   `HttpError` is a `sealed class`: `ServerError(code, message, body)` and
+    `ClientException(cause)`. Map it to a domain error inside the service.
+*   Request helpers for the trailing lambda: `withAuthToken(token)`, `withLanguage(locale)`,
+    `withQuery(key, value)`.
+
+```kotlin
+client.get<ProfileDto>("$BASE/profile/$id") {
+    withAuthToken(token)
+    withQuery("expand", "avatar")
 }
 ```
 
@@ -261,28 +326,268 @@ fun FeatureScreen(
 ```
 
 ### 4. Dependency Injection (Koin)
-*   Define dependencies in `DI.kt`.
-*   Use `factory` for `ViewInteractors` (creates a new instance per screen/component).
-*   Use `single` for `AppInteractors`, `Coordinators`, and `Services` (Singleton lifecycle).
-*   Use `expect fun platformModule()` to inject iOS/Android specific implementations.
+
+Registered in `commonMain/DI.kt` (`commonModule()`) and per-platform `PlatformDI.kt`
+(`actual fun platformModule()`). Koin DSL, not annotations, so every binding is visible in one file.
+
+*   `factory` for **ViewInteractors** — a fresh instance per screen or component.
+*   `single` for **App/Domain Interactors, Coordinators and Services**.
+*   **Always `bind` a service to its interface.** See Non-Negotiable #4: `bind FooServiceImpl::class`
+    compiles, does nothing, and fails at runtime the first time anything injects `FooService`.
+*   Anything constructed from a platform handle (a `Context`, a file path) belongs in
+    `platformModule()`, not `commonModule()`.
 
 ```kotlin
+// commonMain/DI.kt
 fun commonModule() = module {
-    // Services
-    single { ApiServiceImpl(get()) } bind ApiService::class
-    
+    // Services — note the interface on the right of `bind`
+    single { DiamondEdgeLoggingServiceImpl() } bind LoggingService::class
+    single { KVStoreBasedAppSettingsServiceImpl(get()) } bind AppSettingsService::class
+    single { KtorClient(get()) }
+
     // Domain Interactors
-    single { DataInteractor(get()) }
-    
-    // Navigation
+    single { AppSettingsInteractor(get(), get()) }
+
+    // UI foundation
     single { AppCoordinator() }
-    
+    factory { params -> AppInteractor(params[0], get()) }   // params[0] = deep link
+
     // View Interactors
-    factory { FeatureViewInteractor(get(), get()) }
-    factory { params -> DetailViewInteractor(params[0], get(), get()) } // Screen with args
-    factory { ComplexWidgetViewInteractor(get()) } // Component with own interactor
+    factory { HomeScreenViewInteractor(get(), get()) }
+    factory { params -> DetailsScreenViewInteractor(params[0], get()) }  // params[0] = route arg
 }
+```
+
+```kotlin
+// androidMain/PlatformDI.kt — one of these per platform
+actual data class PlatformContext(val context: Context)
+
+actual fun platformModule(platformContext: PlatformContext) = module {
+    single { platformContext.context }
+    single { KmpKvStore(appContext = platformContext.context) }
+    single { AppInformationServiceImpl(platformContext.context, get()) } bind AppInformationService::class
+}
+```
+
+Inject into a composable with `rememberInject`, and pass route arguments with `parametersOf`:
+
+```kotlin
+interactor: HomeScreenViewInteractor = rememberInject<HomeScreenViewInteractor>()
+interactor: DetailsScreenViewInteractor = rememberInject<DetailsScreenViewInteractor> { parametersOf(id) }
 ```
 
 ### 5. Expected Error Handling
 Never throw plain exceptions to the UI. Always handle expected failures with the `Outcome` pattern and `sealed class` error types. Provide extension functions (e.g., `.toUserMessage()`) in the UI layer to translate Domain errors into human-readable Strings using Compose String Resources.
+
+---
+
+## 🧭 Recipe: Add a Screen
+
+Five touchpoints, in this order. Missing #4 is the usual mistake — it fails at runtime, not compile
+time.
+
+**1. Route** — `ui/router.kt`. Add to the sealed class; `webRoutePath` powers web URLs and deep links.
+
+```kotlin
+data object Settings : Route(webRoutePath = "/settings", webRouteTitle = "Settings")
+data class Profile(val userId: String) :
+    Route(webRoutePath = "/profile/$userId", webRouteTitle = "Profile")
+```
+
+**2. Coordinator method** — `ui/coordinator.kt`. Navigation decisions live here, never in a View or
+a ViewInteractor. Name it after the *event*, not the destination.
+
+```kotlin
+fun settingsClicked() = push(Route.Settings)
+fun profileClicked(userId: String) = push(Route.Profile(userId))
+```
+
+**3. ViewInteractor** — `ui/screen/settings/SettingsScreenViewInteractor.kt`. Public functions mirror
+UI events (`onSaveClicked()`), never implementation (`loadData()`).
+
+```kotlin
+class SettingsScreenViewInteractor(
+    private val coordinator: AppCoordinator,
+    private val settingsInteractor: AppSettingsInteractor,
+) : Interactor<SettingsScreenState>(
+    initialState = SettingsScreenState(),
+    dependencies = listOf(settingsInteractor),   // recompute when this changes
+) {
+    override fun computed(state: SettingsScreenState) =
+        state.copy(themeMode = settingsInteractor.state.settings.themeMode)
+
+    fun onThemeModeSelected(mode: ThemeMode) = settingsInteractor.setThemeMode(mode)
+    fun onBackClicked() = coordinator.pop()
+}
+
+data class SettingsScreenState(val themeMode: ThemeMode = ThemeMode.System)
+```
+
+**4. Register in DI** — `DI.kt`. Forgetting this throws `NoDefinitionFoundException` at runtime.
+
+```kotlin
+factory { SettingsScreenViewInteractor(get(), get()) }
+```
+
+**5. Screen + `RouteSwitch`** — the composable, then wire it in `ui/app.kt`.
+
+```kotlin
+@Composable
+fun SettingsScreen(
+    interactor: SettingsScreenViewInteractor = rememberInject<SettingsScreenViewInteractor>()
+) {
+    val state = interactor.collectAsState()
+
+    AppScreen(
+        toolbar = {
+            AppToolbar(
+                title = "Settings",
+                showBackButton = true,
+                onBackClicked = { interactor.onBackClicked() },
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.TopCenter).padding(Theme[spacing][screenPadding]),
+            verticalArrangement = Arrangement.spacedBy(Theme[spacing][elementPadding]),
+        ) {
+            Text("Theme", style = Theme[typography][h3])
+            // ...
+        }
+    }
+}
+```
+
+```kotlin
+// ui/app.kt
+RouteSwitch(coordinator) {
+    when (it) {
+        Route.Home -> Authorized(state) { HomeScreen() }
+        Route.Settings -> Authorized(state) { SettingsScreen() }
+        is Route.Details -> Authorized(state) { DetailsScreen(it.id) }
+    }
+}
+```
+
+The `when` is exhaustive over `Route`, so the compiler will tell you if you skip this step.
+
+---
+
+## 🔌 Recipe: Add a Service
+
+**1. Interface** in `domain/service/` — pure Kotlin, `Outcome` returns, no framework types.
+
+```kotlin
+interface ProfileService {
+    suspend fun fetchProfile(id: String): Outcome<Profile, ProfileError>
+}
+```
+
+**2. Error type** in `domain/model/` — a `sealed class`, never a raw exception.
+
+```kotlin
+sealed class ProfileError {
+    data object NotFound : ProfileError()
+    data object Network : ProfileError()
+    data class Server(val code: Int) : ProfileError()
+}
+```
+
+**3. Implementation** in `data/service/` — catches everything, maps DTOs to entities.
+
+```kotlin
+class ProfileServiceImpl(private val client: KtorClient) : ProfileService {
+    override suspend fun fetchProfile(id: String): Outcome<Profile, ProfileError> =
+        when (val result = client.get<ProfileDto>("$BASE_URL/profile/$id")) {
+            is Outcome.Ok -> Outcome.Ok(result.value.toModel())
+            is Outcome.Error -> Outcome.Error(
+                when (val e = result.error) {
+                    is HttpError.ServerError -> if (e.code == 404) {
+                        ProfileError.NotFound
+                    } else {
+                        ProfileError.Server(e.code)
+                    }
+                    is HttpError.ClientException -> ProfileError.Network
+                },
+            )
+        }
+}
+```
+
+**4. Register** in `DI.kt`, bound to the interface:
+`single { ProfileServiceImpl(get()) } bind ProfileService::class`
+
+If the implementation needs a platform handle, make it an `expect class` in
+`commonMain/data/service/` and register it in each `platformModule()` instead.
+
+---
+
+## 📱 Recipe: Platform-Specific Behaviour
+
+Three tools, in order of preference.
+
+**1. `appPlatform` (`ui/design/Platform.kt`) — default choice.** A `commonMain` value from OSKit's
+`Platform.current`. Use it for anything that is a platform *convention*.
+
+```kotlin
+val padding = when (appPlatform) {
+    AppPlatform.Android -> 16.dp
+    AppPlatform.IOS -> 16.dp
+    AppPlatform.Desktop, AppPlatform.Web -> 24.dp
+}
+```
+
+Prefer extending the existing `when (appPlatform)` blocks in `Metrics.kt`, `Shapes.kt`,
+`Typography.kt`, `Spacing.kt` and `PressEffects.kt` over adding new ones elsewhere.
+
+**2. `LocalInteractionMode` — only for input-device questions.** It reports finger vs pointer, which
+is *not* the same as the OS. An Android tablet with a mouse is `AppPlatform.Android` with
+`InteractionMode.Pointer`: it should still show a Material ripple and pill buttons, but may tighten
+its tap targets. Use the platform for "what do users of this OS expect" and interaction mode for
+"how big should this target be right now".
+
+**3. `expect`/`actual` — only when you need a platform-only API** (`Context`, `UIDevice`,
+`window`). Everything Composables UI needs is available in `commonMain`, so reaching for
+`expect`/`actual` for styling means four near-identical `actual`s instead of one readable `when`.
+
+Never branch on the platform inside a screen. Put the decision in `ui/design/` and let the screen
+read a token.
+
+---
+
+## ✅ Verifying Your Work
+
+A green compile is not enough — theme tokens resolve at composition time, and DI resolves at
+runtime. Always get the app on screen.
+
+```bash
+./gradlew :composeApp:compileKotlinDesktop      # fastest signal for commonMain
+./gradlew :composeApp:allTests                  # multiplatform tests
+./gradlew :composeApp:run                       # THE important one: proves tokens + DI resolve
+./gradlew :androidApp:installDebug              # touch sizing, ripple, insets
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+```
+
+Task gotchas specific to this project:
+
+*   Use `:composeApp:packageDistributionForCurrentOS`, **not** `:composeApp:package` — the umbrella
+    task is not configuration-cache compatible.
+*   `:composeApp:generateIcons` needs `--no-configuration-cache` and is deliberately on-demand; its
+    dependency edge onto every Kotlin/Native link task is cut in `composeApp/build.gradle.kts`.
+*   iOS builds from Xcode need `OTHER_LDFLAGS = -lsqlite3`, generated into
+    `iosApp/Configuration/Config.xcconfig` by the `syncIosConfig` task. Never edit that file by hand.
+
+---
+
+## 🐛 Common Failure Modes
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `There is no <property> property in the AppTheme theme` at runtime | A token is read but not defined | Add it to the matching `properties[...]` map in `AppTheme.kt` |
+| `Tried to access the value of the token called <x>` | Same, for a single token | Same |
+| `NoDefinitionFoundException` for a service | Bound to the impl instead of the interface | `bind FooService::class` |
+| `NoDefinitionFoundException` for a ViewInteractor | Not registered | Add a `factory { }` to `commonModule()` |
+| Settings silently reset after adding a field | DTO field has no default | Give every persisted DTO field a default |
+| Leading and trailing toolbar slots overlap | A container that does not stretch | Ensure `fillMaxWidth()`; `AppToolbar` already does |
+| Compiles, then looks unstyled | Imported a Material component | Import from `com.composables.ui.components.*` |
+| Ripple on iOS, or no hover on desktop | Press effect hardcoded instead of themed | Let `appPressIndication()` drive the indication tokens |

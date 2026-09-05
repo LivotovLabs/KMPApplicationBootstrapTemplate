@@ -66,7 +66,60 @@ To start a new project using this template:
 2.  **Configure**: Update your App Name, ID, and Namespaces in `gradle/libs.versions.toml`.
 3.  **Prune Targets**: Remove any platform targets you don't need from `composeApp/build.gradle.kts`.
 4.  **Prune Components**: Remove any pre-installed services or components that aren't relevant to your app.
-5.  **Code**: Start building your features in `commonMain`!
+5.  **Rebrand**: Edit `ui/design/Colors.kt` (and `Shapes.kt` / `Typography.kt` / `Spacing.kt`). Leave
+    `AppTheme.kt` alone — it only binds those values to token names. See [Design System](#design-system).
+6.  **Code**: Start building your features in `commonMain`.
+
+Then read these three, in order:
+
+*   **[Project Layout](#project-layout)** — where each kind of file goes.
+*   **[Architecture & Core Concepts](#architecture--core-concepts)** — VISCE, plus copy-paste recipes
+    for adding a screen and adding a service.
+*   **[`CLAUDE.md`](CLAUDE.md)** — the authoritative coding conventions: the ten non-negotiable
+    rules, `Interactor` state patterns, platform-specific code, and a table of common failure modes.
+    Written for AI coding agents, but it is the reference humans should follow too. Agents pick it up
+    automatically; `GEMINI.md` just points at it.
+
+Before you go far, skim **[Verifying Changes](#verifying-changes)**: theme tokens resolve at
+composition time and Koin resolves at runtime, so a green compile does not mean working code.
+
+---
+
+## Project Layout
+
+Where things go. `data/` implements the interfaces declared in `domain/service/`; the UI never talks
+to `data/` directly.
+
+```text
+composeApp/src/commonMain/kotlin/com/watermelonkode/simpletemplate/
+  ├── DI.kt                     # commonModule() + initKoin() + expect platformModule()
+  ├── domain/                   # Pure business rules. No framework or platform types.
+  │   ├── interactor/           # App-wide interactors (AppSettingsInteractor)
+  │   ├── model/                # Entities, enums, error sealed classes
+  │   └── service/              # Service INTERFACES only
+  ├── data/                     # Infrastructure
+  │   ├── core/                 # Shared plumbing (KtorClient)
+  │   └── service/              # Service IMPLEMENTATIONS
+  └── ui/
+      ├── app.kt                # App(): AppTheme + RouteSwitch — register screens here
+      ├── router.kt             # sealed class Route + deep links
+      ├── coordinator.kt        # AppCoordinator — every navigation decision
+      ├── interactor.kt         # AppInteractor — app-wide UI state
+      ├── design/               # The design system (see below)
+      │   ├── AppTheme.kt                                      # binds values to tokens
+      │   ├── Colors.kt Shapes.kt Typography.kt Spacing.kt      # your brand
+      │   ├── Platform.kt PressEffects.kt Metrics.kt            # platform feel
+      │   └── components/       # AppScreen, AppToolbar, AppScrollbar
+      └── screen/<feature>/     # <Feature>Screen.kt + <Feature>ScreenViewInteractor.kt
+```
+
+Platform source sets (`androidMain`, `iosMain`, `desktopMain`, `wasmJsMain`) each hold a
+`PlatformDI.kt` with `actual fun platformModule()` and `actual class PlatformContext`, plus any
+`actual` service implementations.
+
+Two naming conventions worth keeping: the four files directly under `ui/` are lowercase
+(`app.kt`, `router.kt`, `coordinator.kt`, `interactor.kt`), and platform `actual`s are suffixed
+`.android.kt` / `.ios.kt` / `.desktop.kt` / `.wasm.kt`.
 
 ---
 
@@ -81,19 +134,90 @@ This project follows the **VISCE** architecture pattern and utilizes the [OSKit-
 *   **`AppCoordinator`**: Manages navigation logic (push, pop, deep links).
 *   **`RouteSwitch`**: A composable that observes the coordinator and switches screens.
 
-**Adding a New Screen:**
-1.  **Define Route**: Add a route object to `sealed class Route` in `composeApp/.../ui/router.kt`.
-2.  **Create Screen**: Build your Composable (e.g., `SettingsScreen`).
-3.  **Register**: Update `RouteSwitch` in `App.kt` to map the route to the screen.
+**Adding a New Screen** — five touchpoints, in this order:
+
+1.  **Route** — add to `sealed class Route` in `ui/router.kt`. `webRoutePath` powers web URLs and
+    deep links.
+    ```kotlin
+    data object Settings : Route(webRoutePath = "/settings", webRouteTitle = "Settings")
+    ```
+2.  **Coordinator method** — in `ui/coordinator.kt`. Navigation decisions live *only* here, never in
+    a screen or a ViewInteractor. Name it after the event, not the destination:
+    ```kotlin
+    fun settingsClicked() = push(Route.Settings)
+    ```
+3.  **ViewInteractor** — `ui/screen/settings/SettingsScreenViewInteractor.kt`. Holds the screen's
+    state and logic; its public functions mirror UI events (`onSaveClicked()`), not implementation
+    details (`loadData()`).
+4.  **Register it in DI** — add `factory { SettingsScreenViewInteractor(get(), get()) }` to
+    `commonModule()` in `DI.kt`. **This step fails at runtime, not compile time**, so it is the one
+    people forget.
+5.  **Screen + `RouteSwitch`** — write the composable starting from `AppScreen`, then map the route
+    in `ui/app.kt`:
     ```kotlin
     RouteSwitch(coordinator) {
         when (it) {
             Route.Home -> Authorized(state) { HomeScreen() }
             Route.Settings -> Authorized(state) { SettingsScreen() }
+            is Route.Details -> Authorized(state) { DetailsScreen(it.id) }
         }
     }
     ```
-4.  **Navigate**: Call `push(Route.Settings)` from your Coordinator/Interactor.
+    The `when` is exhaustive over `Route`, so the compiler catches a missing entry here.
+
+A minimal screen looks like this — note that everything visual comes from a token, and the toolbar
+and insets come from `AppScreen`/`AppToolbar`:
+
+```kotlin
+@Composable
+fun SettingsScreen(
+    interactor: SettingsScreenViewInteractor = rememberInject<SettingsScreenViewInteractor>()
+) {
+    val state = interactor.collectAsState()
+
+    AppScreen(
+        toolbar = {
+            AppToolbar(
+                title = "Settings",
+                showBackButton = true,
+                onBackClicked = { interactor.onBackClicked() },
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.TopCenter).padding(Theme[spacing][screenPadding]),
+            verticalArrangement = Arrangement.spacedBy(Theme[spacing][elementPadding]),
+        ) {
+            Text("Appearance", style = Theme[typography][h3])
+            Button(onClick = { interactor.onSaveClicked() }, style = ButtonStyle.Primary) {
+                Text("Save")
+            }
+        }
+    }
+}
+```
+
+**Adding a Service** — the boundary to the outside world (HTTP, database, sensors):
+
+1.  **Interface** in `domain/service/`, returning `Outcome<Value, Error>`. Services must never throw.
+2.  **Error type** in `domain/model/` as a `sealed class`.
+3.  **Implementation** in `data/service/`, catching everything and mapping DTOs to domain entities.
+    Use the preconfigured `KtorClient` from `data/core/` for HTTP — its `get`/`post`/`patch`/`put`/
+    `delete` extensions already return `Outcome<T, HttpError>` and never throw. Translate `HttpError`
+    into your own domain error inside the service so transport details do not leak upward.
+4.  **Register** in `DI.kt` bound to the *interface*:
+    `single { ProfileServiceImpl(get()) } bind ProfileService::class`.
+
+> **Watch out:** binding to the implementation (`bind ProfileServiceImpl::class`) compiles, does
+> nothing, and every `get<ProfileService>()` then fails at runtime — and only once something first
+> injects it. This exact bug sat undetected in this template until v2.0.
+
+If the implementation needs a platform handle (an Android `Context`, a file path), make it an
+`expect class` in `commonMain/data/service/` and register it in each `platformModule()` instead.
+
+`CLAUDE.md` holds the full conventions, including copy-paste versions of these recipes, the
+`Interactor` state patterns and a table of common failure modes. It is written for AI coding agents
+but is the authoritative reference for humans too.
 
 ### Design System
 
@@ -308,6 +432,46 @@ require manual steps:
 ### Web (WASM)
 *   **Run**: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun`
 *   **Build**: `./gradlew :composeApp:wasmJsBrowserDistribution`
+
+---
+
+## Verifying Changes
+
+Two whole classes of failure in this stack do **not** show up at compile time, so a green build is
+not enough:
+
+*   **Theme tokens resolve at composition time.** Reading a token that `AppTheme.kt` does not define
+    throws on first render with a message naming the token.
+*   **Koin resolves at runtime.** A missing `factory { }` or a service bound to its own class instead
+    of its interface only fails when something first injects it.
+
+So always get the app on screen:
+
+```bash
+./gradlew :composeApp:compileKotlinDesktop     # fastest signal for commonMain
+./gradlew :composeApp:allTests                 # multiplatform tests
+./gradlew :composeApp:run                      # proves tokens and DI actually resolve
+./gradlew :androidApp:installDebug             # touch sizing, ripple, system insets
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+```
+
+Because the design system is platform-dependent, a change to `ui/design/` should be checked on more
+than one target — desktop and Android together cover the pointer and touch paths.
+
+---
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `There is no <property> property in the AppTheme theme` | A token is read but not defined | Add it to the matching `properties[...]` map in `AppTheme.kt` |
+| `NoDefinitionFoundException` for a service | Bound to the implementation, not the interface | `single { FooServiceImpl() } bind FooService::class` |
+| `NoDefinitionFoundException` for a ViewInteractor | Not registered in `commonModule()` | Add a `factory { }` |
+| Settings reset after adding a field | The persisted DTO field has no default | Give every `AppSettingsDto` field a default |
+| Screen looks unstyled | A Material component was imported | Import from `com.composables.ui.components.*` |
+| Xcode: `symbol(s) not found for architecture arm64` | `sqlite3` not linked into the app target | `./gradlew syncIosConfig` — `OTHER_LDFLAGS` is generated into `Config.xcconfig` |
+| Config-cache failure on `:composeApp:package` | The Compose plugin's umbrella task | Use `packageDistributionForCurrentOS` |
+| Config-cache failure mentioning `generateIcons` | The icon plugin holds a `Project` reference | Run icon generation with `--no-configuration-cache` |
 
 ---
 
