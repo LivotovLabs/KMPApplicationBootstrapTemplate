@@ -18,6 +18,7 @@ buildkonfig {
     objectName = "BuildKonfig"
 
     defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "APP_DISPLAY_NAME", libs.versions.app.displayName.get())
         buildConfigField(FieldSpec.Type.STRING, "APP_VERSION", libs.versions.app.versionName.get())
         buildConfigField(FieldSpec.Type.INT, "APP_BUILD_NUMBER", libs.versions.app.versionCode.get())
     }

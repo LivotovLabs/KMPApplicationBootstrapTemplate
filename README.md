@@ -60,24 +60,55 @@ This project is built on the latest KMP structure compatible with the **Android 
 
 ## Getting Started
 
-To start a new project using this template:
+### The fast path: let an agent bootstrap it
+
+Clone the repo, open it in Claude Code (or any agent that reads `CLAUDE.md`), and say:
+
+```
+bootstrap the app project according to LAUNCHPAD.md
+```
+
+[`LAUNCHPAD.md`](LAUNCHPAD.md) is an executable procedure. The agent will ask you for five things —
+Gradle project name, display name, application ID, Kotlin package, and an icon (a file, or a
+description for it to generate one) — show you the derived plan for confirmation, then apply the lot:
+version catalog, `rootProject.name`, Kotlin package rename across every module and source set, the
+generated Compose Resources package, Android manifest/theme/labels, the iOS xcconfig, platform
+icons, and removal of the template's own metadata. It finishes by building every target and running
+the app, then deletes itself.
+
+The result is a project dedicated to *your* app, with no template leftovers — verified by a grep
+that must come back empty.
+
+### The manual path
 
 1.  **Clone** this repository.
-2.  **Configure**: Update your App Name, ID, and Namespaces in `gradle/libs.versions.toml`.
-3.  **Prune Targets**: Remove any platform targets you don't need from `composeApp/build.gradle.kts`.
-4.  **Prune Components**: Remove any pre-installed services or components that aren't relevant to your app.
-5.  **Rebrand**: Edit `ui/design/Colors.kt` (and `Shapes.kt` / `Typography.kt` / `Spacing.kt`). Leave
+2.  **Configure**: set `app-name`, `app-displayName`, `app-appId`, `android-namespace`,
+    `app-namespace` and `app-desktop-entrypoint` in `gradle/libs.versions.toml`, and
+    `rootProject.name` in `settings.gradle.kts`.
+3.  **Rename packages**: `com.watermelonkode.simpletemplate` → your package in `composeApp`, and
+    `com.watermelonkode.androidapp` → `<your package>.android` in `androidApp`. The two Android
+    namespaces must differ; AGP rejects duplicates.
+4.  **Prune Targets**: remove any platform targets you don't need from `composeApp/build.gradle.kts`.
+5.  **Prune Components**: remove pre-installed services or components that aren't relevant.
+6.  **Rebrand**: edit `ui/design/Colors.kt` (and `Shapes.kt` / `Typography.kt` / `Spacing.kt`). Leave
     `AppTheme.kt` alone — it only binds those values to token names. See [Design System](#design-system).
-6.  **Code**: Start building your features in `commonMain`.
+7.  **Icons**: replace `composeApp/src/commonMain/composeResources/drawable/icon.svg`, then run
+    `./gradlew :composeApp:generateIcons --no-configuration-cache`. Desktop icons are manual — see
+    [Application Icons](#application-icons).
+8.  **Code**: start building your features in `commonMain`.
 
-Then read these three, in order:
+`LAUNCHPAD.md` documents every one of these steps in full, including the parts that are easy to miss
+(the generated resources package changes with `rootProject.name`; the iOS project file carries a
+stale product reference). It is worth reading even if you do the work by hand.
+
+### Then read these
 
 *   **[Project Layout](#project-layout)** — where each kind of file goes.
 *   **[Architecture & Core Concepts](#architecture--core-concepts)** — VISCE, plus copy-paste recipes
     for adding a screen and adding a service.
-*   **[`CLAUDE.md`](CLAUDE.md)** — the authoritative coding conventions: the ten non-negotiable
-    rules, `Interactor` state patterns, platform-specific code, and a table of common failure modes.
-    Written for AI coding agents, but it is the reference humans should follow too. Agents pick it up
+*   **[`CLAUDE.md`](CLAUDE.md)** — the authoritative coding conventions: ten non-negotiable rules,
+    `Interactor` state patterns, platform-specific code, and a table of common failure modes. Written
+    for AI coding agents, but the reference humans should follow too. Agents pick it up
     automatically; `GEMINI.md` just points at it.
 
 Before you go far, skim **[Verifying Changes](#verifying-changes)**: theme tokens resolve at

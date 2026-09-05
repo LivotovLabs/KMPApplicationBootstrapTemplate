@@ -4,6 +4,10 @@
 PRODUCT_NAME=KMPApplicationTemplate
 PRODUCT_BUNDLE_IDENTIFIER=com.watermelonkode.androidapp
 
+// The name iOS shows under the icon. Without this it falls back to PRODUCT_NAME,
+// which is the Gradle-safe name and usually has no spaces.
+INFOPLIST_KEY_CFBundleDisplayName=KMP Application Template
+
 CURRENT_PROJECT_VERSION=1
 MARKETING_VERSION=1.0.0
 

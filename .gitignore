@@ -7,6 +7,9 @@ generated/
 *.class
 *.log
 *.jar
+# Gradle's own guidance is to commit the wrapper JAR: without it a fresh clone cannot run
+# ./gradlew at all, which defeats the point of the wrapper.
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
 *.kotlin_module

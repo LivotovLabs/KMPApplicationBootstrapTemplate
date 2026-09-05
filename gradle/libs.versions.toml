@@ -1,6 +1,9 @@
 [versions]
 app-appId = "com.watermelonkode.androidapp"
 app-name = "KMPApplicationTemplate"
+# Human-readable name shown to users (launcher label, window title, browser tab).
+# May contain spaces and punctuation, unlike app-name.
+app-displayName = "KMP Application Template"
 app-versionCode = "1"
 app-versionName = "1.0.0"
 app-desktop-entrypoint = "com.watermelonkode.simpletemplate.MainKt"

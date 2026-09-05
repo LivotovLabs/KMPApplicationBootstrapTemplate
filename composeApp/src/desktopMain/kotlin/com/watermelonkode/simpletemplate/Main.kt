@@ -9,7 +9,7 @@ fun main() = application {
 
     Window(
         onCloseRequest = ::exitApplication,
-        title = "KMP Template",
+        title = BuildKonfig.APP_DISPLAY_NAME,
     ) {
         App()
     }

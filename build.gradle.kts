@@ -34,6 +34,7 @@ val syncIosConfig by tasks.registering {
         }
 
         val appName = getValue("app-name")
+        val appDisplayName = getValue("app-displayName")
         val appId = getValue("app-appId")
         val versionCode = getValue("app-versionCode")
         val versionName = getValue("app-versionName")
@@ -44,6 +45,10 @@ val syncIosConfig by tasks.registering {
             
             PRODUCT_NAME=$appName
             PRODUCT_BUNDLE_IDENTIFIER=$appId
+
+            // The name iOS shows under the icon. Without this it falls back to PRODUCT_NAME,
+            // which is the Gradle-safe name and usually has no spaces.
+            INFOPLIST_KEY_CFBundleDisplayName=$appDisplayName
 
             CURRENT_PROJECT_VERSION=$versionCode
             MARKETING_VERSION=$versionName
