@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 import com.codingfeline.buildkonfig.compiler.FieldSpec
 
 plugins {
@@ -65,18 +66,25 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting
-        val commonTest by getting
+        val commonMain = getByName("commonMain")
+        val commonTest = getByName("commonTest")
 
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
-            implementation(libs.compose.material3)
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+
+            // Design system: Composables UI + Compose Unstyled theming + Lucide icons
+            implementation(libs.composables.ui)
+            implementation(libs.composeunstyled)
+            implementation(libs.composeunstyled.theming)
+            implementation(libs.composables.interaction)
+            implementation(libs.composables.ripple)
+            implementation(libs.composables.icons)
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization)
@@ -120,13 +128,10 @@ kotlin {
             }
         }
         
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        
-        iosArm64Main.dependsOn(iosMain)
-        iosSimulatorArm64Main.dependsOn(iosMain)
+        getByName("iosArm64Main").dependsOn(iosMain)
+        getByName("iosSimulatorArm64Main").dependsOn(iosMain)
 
-        val desktopMain by getting {
+        getByName("desktopMain") {
             dependencies {
                 implementation(compose.desktop.currentOs)
 
@@ -135,13 +140,28 @@ kotlin {
             }
         }
 
-        val wasmJsMain by getting {
+        getByName("wasmJsMain") {
             dependencies {
                 // Ktor Platform Specific
                 implementation(libs.ktor.client.cio)
             }
         }
 
+    }
+}
+
+// kmp-app-icon-generator hooks `generateIcons` onto every Kotlin/Native link task, and that task
+// holds a Project reference at execution time -- which fails the configuration cache for any iOS
+// build or test. Icon generation is a one-off setup step that rewrites files in the source tree
+// (see README > Application Icons), so it has no business running on every link. Cut the edge and
+// keep the task on demand:
+//
+//     ./gradlew :composeApp:generateIcons --no-configuration-cache
+//
+// Deferred to afterEvaluate so the plugin has already added the dependency by the time we drop it.
+afterEvaluate {
+    tasks.withType<KotlinNativeLink>().configureEach {
+        setDependsOn(dependsOn.filterNot { (it as? TaskProvider<*>)?.name == "generateIcons" })
     }
 }
 

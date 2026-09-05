@@ -54,14 +54,20 @@ val syncIosConfig by tasks.registering {
     }
 }
 
+// Resolved eagerly into a plain String: the resolution rule below runs at execution time and
+// must not capture the catalog accessor, or the configuration cache cannot serialize it.
+val kotlinVersion = libs.versions.kotlin.get()
+
 allprojects {
     tasks.withType<KotlinCompile> {
         dependsOn(rootProject.tasks.named("syncIosConfig"))
     }
+    // Transitive dependencies still pin older stdlibs; keep everything on the catalog's Kotlin
+    // version so the compiler and the runtime library can never drift apart.
     configurations.all {
         resolutionStrategy.eachDependency {
             if (requested.group == "org.jetbrains.kotlin" && requested.name.startsWith("kotlin-stdlib")) {
-                useVersion("2.4.0")
+                useVersion(kotlinVersion)
             }
         }
     }

@@ -4,18 +4,6 @@ This is a comprehensive **Kotlin Multiplatform (KMP)** project template designed
 
 The goal is to provide a **minimal-batteries-included** starting point. It solves common architectural challenges—such as navigation, persistent settings, and logging—without enforcing a bloated framework, allowing you to focus on your application's unique features.
 
-## Project Variants
-
-This template is available in two distinct flavors:
-
-*   **`main` (Material 3)**: The default version using standard Google Material 3 components and theming. Best for projects that want to leverage the established Material design system.
-*   **`composables-ui` (Composables UI Kit)**: A modern, unstyled version using **[Composables Core](https://composables.com)** and **Lucide Icons**. Best for projects requiring a fully custom design system without Material 3's visual constraints.
-
-To switch to the Composables UI version:
-```bash
-git checkout composables-ui
-```
-
 ## Project Foundation
 
 This project is built on the latest KMP structure compatible with the **Android Gradle Plugin (AGP) 9**.
@@ -23,21 +11,44 @@ This project is built on the latest KMP structure compatible with the **Android 
 *   **Origin**: Generated using the official [KMP App Wizard](https://kmp.jetbrains.com/?android=true&ios=true&iosui=compose&includeTests=true).
 *   **Modernization**: Heavily inspired by the [watermelonKode/kmp-wizard-template](https://github.com/watermelonKode/kmp-wizard-template), incorporating migration strategies for AGP 9 and modern multiplatform best practices.
 *   **Libraries**: This project also relies heavily on **[OSKit-KMP](https://github.com/outsidesource/OSKit-KMP)** and **[OSKit-Compose-KMP](https://github.com/outsidesource/OSKit-Compose-KMP)** as its core framework foundation. It also uses **[KmLogging](https://github.com/DiamondEdge1/KmLogging)** for robust multiplatform logging. These libraries provide solid implementations for common architectural patterns and logging needs.
+*   **Design System**: The UI is built on **[Composables UI](https://composables.com/ui/docs)** (MIT-licensed) and **[Lucide Icons](https://composables.com/icons)**, not Material. See [Design System](#design-system) below.
 
 ## Version Information
 
-*   **Kotlin:** 2.3.20
-*   **AGP Plugin:** 9.1.0
-*   **Google Services** 4.4.4
-*   **Compose Multiplatform:** 1.10.3
-*   **Koin:** 4.2.0
-*   **Ktor:** 3.4.2
-*   **OSKIT:** 5.1.0
-*   **OSKIT Compose:** 4.1.1
+*   **Kotlin:** 2.4.10
+*   **Gradle:** 9.7.1
+*   **AGP Plugin:** 9.4.0
+*   **Android compileSdk / targetSdk:** 37
+*   **Google Services** 4.5.0
+*   **Compose Multiplatform:** 1.12.0
+*   **Composables UI:** 0.2.0 (with Compose Unstyled 2.7.0)
+*   **Lucide Icons:** 2.2.1
+*   **Koin:** 4.2.2
+*   **Ktor:** 3.5.2
+*   **OSKIT:** 5.2.0-rc1
+*   **OSKIT Compose:** 4.2.0-rc2
+
+> **Note on the OSKit release candidates.** OSKit 5.2.0-rc1 / Compose 4.2.0-rc2 are built against
+> Kotlin 2.4.0, Compose 1.11.1, Koin 4.2.2 and Ktor 3.5.1 -- the stack this template targets. The
+> last stable release (4.1.1) was built against Compose 1.10.1 and pulls Compose **Material 2** onto
+> the classpath. Pin `oskitKmp = "5.1.0"` / `oskitCompose = "4.1.1"` in `libs.versions.toml` if you
+> need stable-only dependencies.
 
 ---
 
 ## Release Notes
+
+### Version 2.0
+*   **Migrated to Composables UI**: The UI layer now uses **[Composables UI](https://composables.com/ui/docs) 0.2.0** (MIT-licensed, free) instead of Material 3. This replaces the old `composables-ui` branch, which used the retired paid *Composables Core* library.
+*   **Single project variant**: The `main` / `composables-ui` split is gone. There is one template, and it is Composables UI. Nothing to check out, nothing to keep in sync.
+*   **New design system** under `composeApp/.../ui/design/`: an app-owned `AppTheme` plus editable `Colors`, `Shapes`, `Typography` and `Spacing` token files, and `AppScreen` / `AppToolbar` shared components. See [Design System](#design-system).
+*   **Light/dark theme setting**: `ThemeMode` (System / Light / Dark) is now a persisted user setting wired through `AppSettingsInteractor` into the theme, with a working toggle on the Home screen.
+*   **Dependencies and toolchain updated**: Kotlin 2.4.10, Gradle 9.7.1, AGP 9.4.0, Compose Multiplatform 1.12.0, Koin 4.2.2, Ktor 3.5.2, BuildKonfig 0.22.0, OSKit 5.2.0-rc1.
+*   **Fixed `AppInformationService` dependency injection**: the platform modules bound `AppInformationServiceImpl` to itself rather than to the `AppInformationService` interface, so anything injecting `AppSettingsInteractor` crashed at startup. It was latent because nothing injected it before.
+*   **Fixed the configuration cache for iOS builds**: `kmp-app-icon-generator` wires `generateIcons` onto every Kotlin/Native link task, and that task is not configuration-cache compatible -- which failed every iOS build and `:composeApp:allTests`. The dependency edge is now cut in `composeApp/build.gradle.kts`; run icon generation on demand instead.
+*   **Removed dead code**: the unused Material 3 theme in `androidApp` (`ui/theme/`) and its `colors.xml` palette.
+*   **Modernized the Gradle DSL**: replaced the `by getting` source-set accessors that Gradle 10 removes.
+*   **AI guidelines moved to `CLAUDE.md`**; `GEMINI.md` is now just a pointer to it.
 
 ### Version 1.1
 *   **Updated Dependencies**: Bumped Kotlin, Compose Multiplatform, Koin, and Ktor to their latest robust versions (see Version Information for details).
@@ -82,6 +93,81 @@ This project follows the **VISCE** architecture pattern and utilizes the [OSKit-
     ```
 4.  **Navigate**: Call `push(Route.Settings)` from your Coordinator/Interactor.
 
+### Design System
+
+The UI is built on **[Composables UI](https://composables.com/ui/docs)** -- accessible, unstyled
+components with a token-based theme -- plus **Lucide** icons. There is no Material theme.
+
+Everything visual is read through one accessor, `Theme[property][token]`:
+
+```kotlin
+import com.composeunstyled.theme.Theme
+
+// Colour, shape, shadow and alpha tokens come from the library:
+import com.composables.ui.theme.colors
+import com.composables.ui.theme.primaryColor
+
+// Typography and spacing are this app's own theme properties:
+import com.watermelonkode.simpletemplate.ui.design.typography
+import com.watermelonkode.simpletemplate.ui.design.h1
+
+Text(text = "Title", style = Theme[typography][h1])
+Box(Modifier.background(Theme[colors][primaryColor]))
+```
+
+#### Rebranding the app
+
+Everything lives in `composeApp/src/commonMain/kotlin/.../ui/design/`:
+
+| File | What to change |
+|---|---|
+| `Colors.kt` | **Start here.** `AppLightPalette` / `AppDarkPalette` -- one property per colour token. |
+| `Shapes.kt` | Corner radii, with separate touch and pointer variants. |
+| `Typography.kt` | The type scale (`h1`..`h3`, `bodyLarge`, `labelLarge`, ...). |
+| `Spacing.kt` | `screenPadding`, `elementPadding`, `smallPadding`. |
+| `AppTheme.kt` | Leave alone -- it only binds the values above to token names. |
+
+`AppTheme` is a full replacement for the library's own `ComposablesTheme`, not a wrapper around it.
+Compose Unstyled's `buildTheme {}` replaces the ambient theme wholesale, and the library exposes no
+API for overriding one token, so owning the definition is the supported way to control the palette.
+Because `AppTheme` populates the library's own token identities, every stock component
+(`Button`, `TextField`, `AlertDialog`, ...) picks up your values automatically.
+
+> If a future Composables UI release adds a token that `AppTheme.kt` does not define,
+> `Theme[property][token]` throws at **composition** time with a message naming the missing token.
+> Always run the app after upgrading the library -- a clean compile does not prove the theme is
+> complete.
+
+#### Screens and components
+
+Composables UI ships no `Scaffold`, so screens are built from the template's own shared components
+in `ui/design/components/`:
+
+```kotlin
+AppScreen(
+    toolbar = { AppToolbar(title = "Details", showBackButton = true, onBackClicked = { ... }) }
+) {
+    // content, in a Box that already handles safe-area insets
+}
+```
+
+Components adapt to the current input method via `LocalInteractionMode`: bigger and rounder under a
+finger, tighter under a mouse pointer. Prefer letting them size themselves.
+
+#### Theme mode
+
+`ThemeMode` (`System` / `Light` / `Dark`) is a persisted setting. Read it from
+`AppSettingsInteractor.state.settings.themeMode` and change it with
+`AppSettingsInteractor.setThemeMode(...)`; `App()` feeds it into `AppTheme`, which crossfades the
+colours on change. The Home screen has a working toggle you can copy or delete.
+
+> **On Material:** the app's design system is Composables UI only, and no app code imports
+> `androidx.compose.material*`. Compose Material does still appear on the *classpath*, because
+> `oskit-compose` declares it as a transitive dependency. That is as far as removal goes without
+> dropping OSKit.
+
+---
+
 ### Logging
 A unified `LoggingService` is available across all platforms.
 
@@ -108,7 +194,8 @@ We specifically chose the **Koin DSL** over annotation-based configuration to:
 ### Settings & App Information
 Use `AppSettingsInteractor` for UI-related state (user settings + app version).
 
-*   **`AppSettingsInteractor`**: Provides `settings` (e.g., theme, mute) and `appVersion`/`buildNumber`.
+*   **`AppSettingsInteractor`**: Provides `settings` (`themeMode`, `muted`) and `appVersion`/`buildNumber`, plus `setThemeMode(...)` / `setMuted(...)` to change them.
+    *   Settings are persisted as `AppSettingsDto`. **Every field in that DTO must have a default**, so blobs written by an older build still deserialize after you add a field.
 *   **`AppSettingsService`**: Low-level Key-Value storage for settings.
 *   **`AppInformationService`**: Low-level provider for platform-specific version metadata.
 
@@ -146,6 +233,10 @@ require manual steps:
     *   Place `icon.svg` or 1024x1024 `icon.png` in `composeApp/src/commonMain/composeResources/drawable/`.
     *   Run `./gradlew :composeApp:generateIcons --no-configuration-cache`
     *   The task will generate platform icon resources in: Android - `mipmap` and iOS - `Assets.xcassets`.
+    *   This is a deliberate **on-demand** step. The `kmp-app-icon-generator` plugin normally hooks
+      `generateIcons` onto every Kotlin/Native link task, but the task is not configuration-cache
+      compatible, so that broke every iOS build. `composeApp/build.gradle.kts` cuts that dependency
+      edge -- which is also why the task needs `--no-configuration-cache` when you do run it.
     
 2.   **Desktop target**: 
      *  Manually replace icons in `composeApp/src/desktopMain/resources/icons/` (`icon.icns`, `icon.ico`, `icon.png`).
@@ -165,8 +256,10 @@ require manual steps:
 
 ### Desktop (JVM)
 *   **Run**: `./gradlew :composeApp:run`
-*   **Package**: `./gradlew :composeApp:package`
+*   **Package**: `./gradlew :composeApp:packageDistributionForCurrentOS`
     *   Output: `composeApp/build/compose/binaries/main/` (DMG, MSI, or DEB depending on OS).
+    *   The Compose plugin's umbrella `:composeApp:package` task is not configuration-cache
+      compatible; use the task above, or add `--no-configuration-cache`.
 
 ### Web (WASM)
 *   **Run**: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun`

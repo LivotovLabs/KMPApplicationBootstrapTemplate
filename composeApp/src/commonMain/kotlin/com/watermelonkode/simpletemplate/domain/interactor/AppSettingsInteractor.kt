@@ -2,6 +2,7 @@ package com.watermelonkode.simpletemplate.domain.interactor
 
 import com.outsidesource.oskitkmp.interactor.Interactor
 import com.watermelonkode.simpletemplate.domain.model.settings.AppSettings
+import com.watermelonkode.simpletemplate.domain.model.settings.ThemeMode
 import com.watermelonkode.simpletemplate.domain.service.AppInformationService
 import com.watermelonkode.simpletemplate.domain.service.AppSettingsService
 import kotlinx.coroutines.launch
@@ -37,6 +38,25 @@ class AppSettingsInteractor(
         }
     }
 
+    /**
+     * Selects the colour scheme the app should use.
+     *
+     * The write goes to storage, not to state: [AppSettingsService.observeSettings] is the single
+     * source of truth and
+     * emits the new value straight back into [AppSettingsInteractorState].
+     */
+    fun setThemeMode(mode: ThemeMode) = updateSettings { it.copy(themeMode = mode) }
+
+    /**
+     * Mutes or unmutes the app.
+     */
+    fun setMuted(muted: Boolean) = updateSettings { it.copy(muted = muted) }
+
+    private fun updateSettings(transform: (AppSettings) -> AppSettings) {
+        interactorScope.launch {
+            settingsService.updateSettings(transform(state.settings))
+        }
+    }
 }
 
 /**

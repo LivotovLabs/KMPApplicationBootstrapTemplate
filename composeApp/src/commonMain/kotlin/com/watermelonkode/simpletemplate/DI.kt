@@ -44,6 +44,6 @@ fun commonModule() = module {
     factory { params -> AppInteractor(params[0], get()) }
 
     // UI Screens
-    factory { HomeScreenViewInteractor(get()) }
+    factory { HomeScreenViewInteractor(get(), get()) }
     factory { params -> DetailsScreenViewInteractor(params[0], get()) }
 }

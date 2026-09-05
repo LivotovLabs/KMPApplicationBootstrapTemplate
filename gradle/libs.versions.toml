@@ -5,7 +5,7 @@ app-versionCode = "1"
 app-versionName = "1.0.0"
 app-desktop-entrypoint = "com.watermelonkode.simpletemplate.MainKt"
 
-agp = "9.2.1"
+agp = "9.4.0"
 
 android-compileSdk = "37"
 android-minSdk = "28"
@@ -14,35 +14,41 @@ android-namespace = "com.watermelonkode.simpletemplate"
 app-namespace = "com.watermelonkode.androidapp"
 
 androidx-activity = "1.13.0"
-androidx-appcompat = "1.7.1"
 androidx-core = "1.19.0"
 androidx-espresso = "3.7.0"
-androidx-lifecycle = "2.10.0"
+androidx-lifecycle = "2.11.0"
 androidx-testExt = "1.3.0"
-composeMultiplatform = "1.11.1"
+composeMultiplatform = "1.12.0"
 gservices = "4.5.0"
 junit = "4.13.2"
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 kotlinx-coroutines = "1.11.0"
 kotlinxCoroutinesCore = "1.11.0"
 kotlinx-datetime = "0.8.0"
 kotlinx-serialization = "1.11.0"
-material3 = "1.10.0-alpha05"
 lifecycleRuntimeKtx = "2.11.0"
-composeBom = "2026.06.00"
+composeBom = "2026.08.00"
 splashscreen = "1.2.0"
-composables-ui = "0.1.0"
+
+# Composables UI design system.
+# `composeunstyled` must stay on the version `composables-ui` was compiled against
+# (com.composables:ui:0.2.0 -> composeunstyled 2.7.0), because ui/design/AppTheme.kt
+# calls buildTheme {} / Theme[...] from it directly.
+composables-ui = "0.2.0"
+composeunstyled = "2.7.0"
+composables-interaction = "1.1.0"
+composables-ripple = "1.1.0"
 composables-icons = "2.2.1"
 
-koin = "4.2.1"
+koin = "4.2.2"
 koin-plugin = "1.0.1"
 
-oskitCompose = "4.1.1"
-oskitKmp = "5.1.0"
+oskitCompose = "4.2.0-rc2"
+oskitKmp = "5.2.0-rc1"
 
-ktor = "3.5.0"
+ktor = "3.5.2"
 
-logger = "2.1.1"
+logger = "2.1.2"
 
 
 
@@ -58,14 +64,12 @@ junit = { module = "junit:junit", version.ref = "junit" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-testExt-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-testExt" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-espresso" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 compose-uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "composeMultiplatform" }
 androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
@@ -77,9 +81,12 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
-composables-ui = { module = "com.composables:ui", version.ref = "composables-ui"}
+composables-ui = { module = "com.composables:ui", version.ref = "composables-ui" }
+composeunstyled = { module = "com.composables:composeunstyled", version.ref = "composeunstyled" }
+composeunstyled-theming = { module = "com.composables:composeunstyled-theming", version.ref = "composeunstyled" }
+composables-interaction = { module = "com.composables:compose-interaction-capabilities", version.ref = "composables-interaction" }
+composables-ripple = { module = "com.composables:ripple-indication", version.ref = "composables-ripple" }
 composables-icons = { module = "com.composables:icons-lucide-cmp", version.ref = "composables-icons" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
@@ -112,4 +119,4 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kmpAppIconGenerator = { id = "io.github.qamarelsafadi.kmp.app.icon.generator", version = "1.2.6" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
-buildkonfig = { id = "com.codingfeline.buildkonfig", version = "0.15.2" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version = "0.22.0" }

@@ -4,6 +4,7 @@ import com.outsidesource.oskitkmp.outcome.unwrapOrNull
 import com.outsidesource.oskitkmp.storage.IKmpKvStore
 import com.outsidesource.oskitkmp.storage.IKmpKvStoreNode
 import com.watermelonkode.simpletemplate.domain.model.settings.AppSettings
+import com.watermelonkode.simpletemplate.domain.model.settings.ThemeMode
 import com.watermelonkode.simpletemplate.domain.service.AppSettingsService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -45,17 +46,26 @@ class KVStoreBasedAppSettingsServiceImpl(
     }
 }
 
+/**
+ * Persisted shape of [AppSettings].
+ *
+ * Every field must keep a default: that is what lets settings blobs written by an older build of
+ * the app still deserialize after a new field is added here.
+ */
 @Serializable
 data class AppSettingsDto(
-    val muted: Boolean = false
+    val muted: Boolean = false,
+    val themeMode: ThemeMode = ThemeMode.System
 ) {
     fun toModel() = AppSettings(
-        muted = muted
+        muted = muted,
+        themeMode = themeMode
     )
 
     companion object {
         fun fromModel(value: AppSettings) = AppSettingsDto(
-            muted = value.muted
+            muted = value.muted,
+            themeMode = value.themeMode
         )
     }
 }

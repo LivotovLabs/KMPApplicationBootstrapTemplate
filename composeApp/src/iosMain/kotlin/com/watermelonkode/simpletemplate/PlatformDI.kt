@@ -2,6 +2,7 @@ package com.watermelonkode.simpletemplate
 
 import com.outsidesource.oskitkmp.storage.KmpKvStore
 import com.watermelonkode.simpletemplate.data.service.AppInformationServiceImpl
+import com.watermelonkode.simpletemplate.domain.service.AppInformationService
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -12,7 +13,7 @@ actual class PlatformContext
 
 actual fun platformModule(platformContext: PlatformContext): Module = module {
     single { KmpKvStore() }
-    single { AppInformationServiceImpl(get()) } bind AppInformationServiceImpl::class
+    single { AppInformationServiceImpl(get()) } bind AppInformationService::class
 }
 
 fun loadKoinSwiftModules() {

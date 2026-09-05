@@ -11,6 +11,12 @@ class DetailsScreenViewInteractor(
     dependencies = listOf()
 ) {
 
+    /** Toolbar back arrow: step back one route. */
+    fun onBackClicked() {
+        coordinator.pop()
+    }
+
+    /** "Close" action: unwind the whole stack back to Home. */
     fun homeClicked() {
         coordinator.returnToHomeClicked()
     }
